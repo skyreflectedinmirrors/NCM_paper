@@ -78,9 +78,9 @@ abstract itself.
 Single Instruction, Multiple-Data (SIMD) processing, also known as vector-processing, is an important parallel computing paradigm that is increasingly being used in scientific computing.
 While central processing unit (CPU) clock speeds have increased rapidly over the past few decades---the phenomena known as Moore's Law---power consumption and head dissipation issues have caused this trend to slow.
 Traditional multi-core parallelism is often used to increase CPU performance, however SIMD processors---and the related Single Instruction, Multiple Thread (SIMT) processors, e.g. graphics processing units (GPUs)---have become more popular due to their increased floating operation throughput.
-The parallel programming standard OpenCL~\cite{stone2010openc} has further enabled adoption of vector-processing based codes in scientific computing by providing a common application program interface (API) for execution on heterogeneous systems (e.g. CPU, GPU, etc.).
+The parallel programming standard OpenCL~\cite{stone2010opencl} has further enabled adoption of vector-processing based codes in scientific computing by providing a common application program interface (API) for execution on heterogeneous systems (e.g. CPU, GPU, etc.).
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.33\linewidth]{SIMD.pdf}
 	\caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data. Adapted from\cite{Simdfig:2016}}
@@ -119,10 +119,27 @@ In addition, the temperature rate of change using the constant-pressure assumpti
 \begin{equation}
 \frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \dot{\omega}_k}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
 \end{equation}
-although the code is equally capable of a constant-volume assumption.
+although the code is equally capable of a evaluating the temperature rate using a constant-volume assumption, we omit this here for brevity.
 
 \subsection{Code Generation}
-Code generation is handled by the python package \texttt{loopy}~\cite{kloeckner_loopy_2014}, which provides an easily accessible 
+Code generation is handled by the python package \texttt{loo.py}~\cite{kloeckner_loopy_2014}, which provides an interface to OpenCL, while allowing for unit testing and simple changes of program structure, e.g. data ordering, vectorization, threading patterns etc.
+Additionally, \texttt{loo.py} allows for code generation for multiple languages, including (non-vectorized) C, CUDA, and Intel's ISPC compiler, which targets SIMD vectorization on the CPU and MIC.
+This is a direction that may be explored in the future to compare the speedups of the various compilers.
+
+\subsection{Data Ordering and Vectorization Patterns}
+For a chemical kinetic model with species $k$ for the $j$-th thermo-chemical state to be evaluated, $[C_k]_j$ there are two choices for data-storage in memory.
+In the ``C'' (row-major) format, species concentrations for $j$-th thermo-chemical state are stored sequentially in memory, i.e.: $[C_0]_0\text{,}\allowbreak C[1]_0\ldots\allowbreak [C_{N_S}]_0\text{,}\allowbreak [C_0]_1\allowbreak\ldots\allowbreak [C_{N_S}]_N$, where $N$ is the total number of thermo-chemical conditions.
+Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for all thermo-chemical states are sequential, i.e.: $[C_0]_0\text{,}\allowbreak[C_0]\ldots\allowbreak[C_0]_N\text{,}\allowbreak[C_1]_0\ldots\allowbreak[C_{N_S}]_N$
+In Sec.~\ref{results} the effect of this ordering will be shown to have a large performance impact on the program runtime.
+
+In this work, a \textit{shallow}-SIMD vectorization has been implemented, entailing each SIMD-lane evaluating the species rates for an thermo-chemical state independently.
+In future efforts, a so called \textit{deep}-SIMD vectorization will be pursued allowing vector-units to cooperate to evaluate species rates for a single thermo-chemical state.
+A deep-vectorization may result in SIMD-\textit{waste} in this context---similar to thread-divergence in SIMT-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds), however past studies demonstrate the merits of deep-SIMT vectorization on GPUs~\cite{Sewerin20151375}.
+
+\section{Results and Discussion}
+
+
+\label{results}
 
 \section{Conclusions}
 %
