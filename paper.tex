@@ -1,0 +1,137 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                          template.tex
+%
+% LaTeX template for papers conforming to the United States Sections of
+% the Combustion Institue style guide.
+%
+% Authors:
+%     Bryan W. Weber, University of Connecticut
+%     Kyle E. Niemeyer, Oregon State University
+%
+% This work is licensed under the Creative Commons Attribution 4.0
+% International License. To view a copy of this license, visit
+% http://creativecommons.org/licenses/by/4.0/.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt]{ussci}
+
+%======================================================================
+\usepackage{todonotes}
+\usepackage{graphicx}
+\usepackage[binary-units]{siunitx}
+\usepackage{gensymb}
+\sisetup{group-separator={,},
+	detect-all,
+	binary-units,
+	list-units = single,
+	range-units = single,
+	range-phrase = --,
+	per-mode = symbol-or-fraction,
+	separate-uncertainty = true,
+	multi-part-units = single,
+	list-final-separator = {, and }
+	%    scientific-notation = fixed
+}
+%======================================================================
+% Add your bibliography file here, replace template.bib
+\addbibresource{paper.bib}
+%======================================================================
+% Replace "Reaction Kinetics" in the line below by your paper topic
+\newcommand\papertopic{Reaction Kinetics}
+%======================================================================
+
+\title{ Title of Paper }
+
+\author[1]{Author Name}
+\author[1]{Author Name}
+\author[2]{Author Name}
+\author[2,*]{Author Name}
+
+\affil[1]{Department, Institution, Address, Country}
+\affil[2]{Department, Institution, Address, Country}
+\affil[*]{Corresponding author: \email{author@university.edu}}
+
+\begin{document}
+\maketitle
+
+%====================================================================
+\begin{abstract} % not to exceed 200 words
+Abstract should be between 150--200 words and should state briefly the purpose
+of the research, the principal results and major conclusions. An abstract is
+often presented separately from the article, so it must be able to stand alone.
+For this reason, References should be avoided, but if essential, then cite the
+author(s) and year(s). Also, non-standard or uncommon abbreviations should be
+avoided, but if essential they must be defined at their first mention in the
+abstract itself.
+\end{abstract}
+
+% (Provide 2-4 keywords describing your research. Only abbreviations firmly
+% established in the field may be used. These keywords will be used for
+% sessioning/indexing purposes.)
+\begin{keyword}
+    Keyword1\sep Keyword2\sep Keyword3\sep Keyword4
+\end{keyword}
+
+%====================================================================
+\section{Introduction}
+%
+
+Single Instruction, Multiple-Data (SIMD) processing, also known as vector-processing, is an important parallel computing paradigm that is increasingly being used in scientific computing.
+While central processing unit (CPU) clock speeds have increased rapidly over the past few decades---the phenomena known as Moore's Law---power consumption and head dissipation issues have caused this trend to slow.
+Traditional multi-core parallelism is often used to increase CPU performance, however SIMD processors---and the related Single Instruction, Multiple Thread (SIMT) processors, e.g. graphics processing units (GPUs)---have become more popular due to their increased floating operation throughput.
+The parallel programming standard OpenCL~\cite{stone2010openc} has further enabled adoption of vector-processing based codes in scientific computing by providing a common application program interface (API) for execution on heterogeneous systems (e.g. CPU, GPU, etc.).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.33\linewidth]{SIMD.pdf}
+	\caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data. Adapted from\cite{Simdfig:2016}}
+	\label{F:SIMD}
+\end{figure}
+
+A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on multiple pieces of data concurrently (Fig.~\ref{F:SIMD}).
+Nearly all modern CPUs have vector processing units capable of running SIMD instructions with typical vector widths of \SIrange{128}{256}{\bit}, e.g. the SSE or AVX2 instruction sets.
+Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor (or MIC), have been developed that have tens of cores with very wide (\SIrange{256}{512}{\bit}) SIMD units---the AVX-512 instruction set---while forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures) are also expected to support AVX-512.
+\todo[inline]{Find a source for this?  It all seems to be weird cpu journalism sites, maybe search intel}
+
+Several recent works, e.g. \cite{CurtisGPU:2017,Sewerin20151375} have investigated SIMT-based chemical kinetic integration on GPUs, however SIMD-based chemical kinetics have been less studied in comparison.
+\textcite{stone2016} implemented a linearly-implicit fourth-order stiff Rosenbrock solver in the OpenCL for various platforms including the CPU, GPU and the MIC; the Rosenbrock solver performance was compared to that of a non-stiff, fourth-order explicit Runge–Kutta–Fehlberg integrator.
+Two parallelization models were investigated in OpenCL, the so called \textit{shallow}-SIMD vectorization, where each SIMD-lane solved a single chemical kinetic initial value problem (IVP), and a SIMT-vectorization where each thread solved a single IVP.
+SIMT-vectorized chemical source term evaluation was \SI{13}{\percent} and \SI{35}{\percent} slower than the equivalent OpenMP code on the CPU and MIC respectively.
+The SIMD-vectorized chemical source terms were up to \SI{3}{$\times$} faster on both platforms than the OpenMP baseline; GPU chemical source term evaluation was of similar performance to the SIMD-vectorized versions.
+SIMD-vectorization improved the integrator performance over the OpenMP baseline by \SIrange{2.5}{2.8}{$\times$} on the CPU and \SIrange{4.7}{4.9}{$\times$} on the MIC.
+\textcite{kroshko2013efficient} implemented a shallow-SIMD -vectorized third order Rosenbrock solver (RODAS) integrator for atmospheric chemistry on a Cell Broadband Engine---a specially designed vector processor---finding a speedup of \SI{1.89}{$\times$} over a serial version of the same code, a \SI{94}{\percent} parallel efficiency.
+
+This work will study the performance of chemical source term evaluation of automatically generated shallow-SIMD-vectorized codes for a wide range chemical kinetic models on the CPU.
+The performance will be compared to a baseline SIMT-vectorized codes to determine the effective SIMD speedup.
+Finally future extensions to this work will be detailed.
+\todo[inline]{and OpenMp, time permitting}
+
+\section{Methodology}
+\subsection{Chemical Kinetics Equations}
+The current code evaluates the following chemical source terms:
+
+\begin{equation}
+\frac{\text{d}[C_k]}{\text{d}t} = \sum_{i}^{N_R} \nu_{k,i} R_i c_i
+\end{equation}
+where $\frac{\text{d}[C_k]}{\text{d}t}$, $N_R$, $\nu_{k,i}$, ${R_i}$, $c_i$ are the time rate of change of the concentration of species $k$, the number of reactions in the model, the net stoichiometric coefficient of species $k$ in reaction $i$, the net rate of progress of reaction $i$, and the pressure modification of reaction $i$ respectively.
+For further detail on each term, the reader is referred to our previous work~\cite{Niemeyer:2016aa}; the code is capable of evaluating all modern reaction rate types (e.g. pressure-log, chebyshev, etc.).
+
+In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: this refers to evaluation within a reaction sub-step in the operator splitting scheme.} is evaluated as:
+\begin{equation}
+\frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \dot{\omega}_k}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
+\end{equation}
+although the code is equally capable of a constant-volume assumption.
+
+\subsection{Code Generation}
+Code generation is handled by the python package \texttt{loopy}~\cite{kloeckner_loopy_2014}, which provides an easily accessible 
+
+\section{Conclusions}
+%
+
+\section{Acknowledgements}
+This research was funded by \ldots
+
+\noindent\textbf{Page Limits:} The total length of the paper including references should be limited to 6 pages.
+
+\printbibliography[heading=bibintoc]
+
+\end{document}
