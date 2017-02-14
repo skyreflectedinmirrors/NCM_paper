@@ -19,6 +19,7 @@
 \usepackage{graphicx}
 \usepackage[binary-units]{siunitx}
 \usepackage{gensymb}
+\usepackage{amsmath}
 \sisetup{group-separator={,},
 	detect-all,
 	binary-units,
@@ -115,7 +116,7 @@ The current code evaluates the following chemical source terms:
 where $\frac{\text{d}[C_k]}{\text{d}t}$, $N_R$, $\nu_{k,i}$, ${R_i}$, $c_i$ are the time rate of change of the concentration of species $k$, the number of reactions in the model, the net stoichiometric coefficient of species $k$ in reaction $i$, the net rate of progress of reaction $i$, and the pressure modification of reaction $i$ respectively.
 For further detail on each term, the reader is referred to our previous work~\cite{Niemeyer:2016aa}; the code is capable of evaluating all modern reaction rate types (e.g. pressure-log, chebyshev, etc.).
 
-In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: this refers to evaluation within a reaction sub-step in the operator splitting scheme.} is evaluated as:
+In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: in this context, the ``constant-pressure assumption'' refers to evaluation within a reaction sub-step in the operator splitting scheme, rather than a general constant-pressure reactive-flow simulation.} is evaluated as:
 \begin{equation}
 \frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \dot{\omega}_k}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
 \end{equation}
@@ -130,13 +131,37 @@ This is a direction that may be explored in the future to compare the speedups o
 For a chemical kinetic model with species $k$ for the $j$-th thermo-chemical state to be evaluated, $[C_k]_j$ there are two choices for data-storage in memory.
 In the ``C'' (row-major) format, species concentrations for $j$-th thermo-chemical state are stored sequentially in memory, i.e.: $[C_0]_0\text{,}\allowbreak C[1]_0\ldots\allowbreak [C_{N_S}]_0\text{,}\allowbreak [C_0]_1\allowbreak\ldots\allowbreak [C_{N_S}]_N$, where $N$ is the total number of thermo-chemical conditions.
 Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for all thermo-chemical states are sequential, i.e.: $[C_0]_0\text{,}\allowbreak[C_0]\ldots\allowbreak[C_0]_N\text{,}\allowbreak[C_1]_0\ldots\allowbreak[C_{N_S}]_N$
-In Sec.~\ref{results} the effect of this ordering will be shown to have a large performance impact on the program runtime.
+In Sec.~\ref{S:results} the effect of this ordering will be shown to have a large performance impact on the program runtime.
 
 In this work, a \textit{shallow}-SIMD vectorization has been implemented, entailing each SIMD-lane evaluating the species rates for an thermo-chemical state independently.
 In future efforts, a so called \textit{deep}-SIMD vectorization will be pursued allowing vector-units to cooperate to evaluate species rates for a single thermo-chemical state.
 A deep-vectorization may result in SIMD-\textit{waste} in this context---similar to thread-divergence in SIMT-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds), however past studies demonstrate the merits of deep-SIMT vectorization on GPUs~\cite{Sewerin20151375}.
 
 \section{Results and Discussion}
+\subsection{Validation}
+The reaction rates of progress, species and temperature rates in this study are validated by comparison to Cantera~\cite{Cantera}, however due to the intricacies of floating point arithmetic care must be taken when comparing results.
+
+In obtaining the net rate of progress of reaction $i$ from the forward and reverse rates of progress, $R_{i} = R_{i}^{\prime} - R_{i}^{\prime\prime}$, a base-10 bound on the loss of precision can be found as~\cite{goldberg1991every}:
+\begin{equation}
+2^{-p_i} \le \left\lvert 1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}} \right\rvert \le 2^{-q_i}
+\label{e:bounds}
+\end{equation}
+with $q_i \le p_i$, while $1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}}$ can be computed with accurately via use of higher-precision numbers (in this case, via use of Python's Decimal class).
+
+Plugging the forward and reverse rate constants from Cantera into Eq.~\eqref{e:bounds} we can obtain a reasonable a-priori precision bounds $\text{P}_{\text{min},i} = 2^{-p_i}$, $\text{P}_{\text{max},i} = 2^{-q_i}$.
+Finally, when determining the error in the net rates of progress between this code and Cantera, the range of percent error attributable to precision loss, $\text{P}_{\text{err},i}$ can be found as:
+\begin{equation}
+\frac{\left\lvert\ R_{i,\text{CT}} - R_{i}\right\rvert}{\text{P}_{\text{min},i}} \le
+\frac{\text{P}_{\text{err},i}}{100} \le \frac{\left\lvert R_{i,\text{CT}} - R_{i} \right\rvert}{\text{P}_{\text{max},i}}
+\label{e:rel_bound}
+\end{equation}
+where the \text{CT} subscript indicates values from Cantera.
+Note that the differences in Eq.~\eqref{e:rel_bound} are not subject to the same scrutiny as when computing the net rate of progress, namely because if they were small enough to merit this analysis the error would be minimal anyways.
+
+With this we can properly validate the code against Cantera, as seen in Table~\todo[inline]{this}
+
+\subsection{Results}
+\label{S:results}
 
 
 \label{results}
