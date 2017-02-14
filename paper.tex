@@ -95,15 +95,12 @@ Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-proces
 Several recent works, e.g. \cite{CurtisGPU:2017,Sewerin20151375} have investigated SIMT-based chemical kinetic integration on GPUs, however SIMD-based chemical kinetics have been less studied in comparison.
 \textcite{stone2016} implemented a linearly-implicit fourth-order stiff Rosenbrock solver in the OpenCL for various platforms including the CPU, GPU and the MIC; the Rosenbrock solver performance was compared to that of a non-stiff, fourth-order explicit Runge–Kutta–Fehlberg integrator.
 Two parallelization models were investigated in OpenCL, the so called \textit{shallow}-SIMD vectorization, where each SIMD-lane solved a single chemical kinetic initial value problem (IVP), and a SIMT-vectorization where each thread solved a single IVP.
-SIMT-vectorized chemical source term evaluation was \SI{13}{\percent} and \SI{35}{\percent} slower than the equivalent OpenMP code on the CPU and MIC respectively.
-The SIMD-vectorized chemical source terms were up to \SI{3}{$\times$} faster on both platforms than the OpenMP baseline; GPU chemical source term evaluation was of similar performance to the SIMD-vectorized versions.
-SIMD-vectorization improved the integrator performance over the OpenMP baseline by \SIrange{2.5}{2.8}{$\times$} on the CPU and \SIrange{4.7}{4.9}{$\times$} on the MIC.
+Shallow-SIMD vectorization improved the integrator performance over the OpenMP baseline by \SIrange{2.5}{2.8}{$\times$} on the CPU and \SIrange{4.7}{4.9}{$\times$} on the MIC, while the GPU performance while the GPU was \SIrange{1.4}{1.6}{$\times$} slower than the OpenMP baseline due to thread-divergence concerns.
 \textcite{kroshko2013efficient} implemented a shallow-SIMD -vectorized third order Rosenbrock solver (RODAS) integrator for atmospheric chemistry on a Cell Broadband Engine---a specially designed vector processor---finding a speedup of \SI{1.89}{$\times$} over a serial version of the same code, a \SI{94}{\percent} parallel efficiency.
 
 This work will study the performance of chemical source term evaluation of automatically generated shallow-SIMD-vectorized codes for a wide range chemical kinetic models on the CPU.
 The performance will be compared to a baseline SIMT-vectorized codes to determine the effective SIMD speedup.
 Finally future extensions to this work will be detailed.
-\todo[inline]{and OpenMp, time permitting}
 
 \section{Methodology}
 \subsection{Chemical Kinetics Equations}
@@ -122,14 +119,14 @@ In addition, the temperature rate of change using the constant-pressure assumpti
 although the code is equally capable of a evaluating the temperature rate using a constant-volume assumption, we omit this here for brevity.
 
 \subsection{Code Generation}
-Code generation is handled by the python package \texttt{loo.py}~\cite{kloeckner_loopy_2014}, which provides an interface to OpenCL, while allowing for unit testing and simple changes of program structure, e.g. data ordering, vectorization, threading patterns etc.
+Code generation is handled by the python package \texttt{loo.py}~\cite{kloeckner_loopy_2014}, which provides an interface to OpenCL allowing for unit testing and changes of program structure, e.g. data ordering, vectorization, threading patterns etc.
 Additionally, \texttt{loo.py} allows for code generation for multiple languages, including (non-vectorized) C, CUDA, and Intel's ISPC compiler, which targets SIMD vectorization on the CPU and MIC.
 This is a direction that may be explored in the future to compare the speedups of the various compilers.
 
 \subsection{Data Ordering and Vectorization Patterns}
 For a chemical kinetic model with species $k$ for the $j$-th thermo-chemical state to be evaluated, $[C_k]_j$ there are two choices for data-storage in memory.
 In the ``C'' (row-major) format, species concentrations for $j$-th thermo-chemical state are stored sequentially in memory, i.e.: $[C_0]_0\text{,}\allowbreak C[1]_0\ldots\allowbreak [C_{N_S}]_0\text{,}\allowbreak [C_0]_1\allowbreak\ldots\allowbreak [C_{N_S}]_N$, where $N$ is the total number of thermo-chemical conditions.
-Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for all thermo-chemical states are sequential, i.e.: $[C_0]_0\text{,}\allowbreak[C_0]\ldots\allowbreak[C_0]_N\text{,}\allowbreak[C_1]_0\ldots\allowbreak[C_{N_S}]_N$
+Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for all thermo-chemical states are sequential, i.e.: $[C_0]_0\text{,}\allowbreak[C_0]_1\ldots\allowbreak[C_0]_N\text{,}\allowbreak[C_1]_0\ldots\allowbreak[C_{N_S}]_N$
 In Sec.~\ref{S:results} the effect of this ordering will be shown to have a large performance impact on the program runtime.
 
 In this work, a \textit{shallow}-SIMD vectorization has been implemented, entailing each SIMD-lane evaluating the species rates for an thermo-chemical state independently.
