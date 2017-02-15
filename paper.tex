@@ -20,6 +20,8 @@
 \usepackage[binary-units]{siunitx}
 \usepackage{gensymb}
 \usepackage{amsmath}
+\usepackage[version=3]{mhchem} % Formula subscripts using \ce{}, e.g., \ce{H2SO4}
+\usepackage{booktabs,multicol} %better tables
 \sisetup{group-separator={,},
 	detect-all,
 	binary-units,
@@ -147,14 +149,38 @@ with $q_i \le p_i$, while $1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}}$ can 
 Plugging the forward and reverse rate constants from Cantera into Eq.~\eqref{e:bounds} we can obtain a reasonable a-priori precision bounds $\text{P}_{\text{min},i} = 2^{-p_i}$, $\text{P}_{\text{max},i} = 2^{-q_i}$.
 Finally, when determining the error in the net rates of progress between this code and Cantera, the range of percent error attributable to precision loss, $\text{P}_{\text{err},i}$ can be found as:
 \begin{equation}
-\frac{\left\lvert\ R_{i,\text{CT}} - R_{i}\right\rvert}{\text{P}_{\text{min},i}} \le
-\frac{\text{P}_{\text{err},i}}{100} \le \frac{\left\lvert R_{i,\text{CT}} - R_{i} \right\rvert}{\text{P}_{\text{max},i}}
+\text{P}_{i,\text{min}} = 100 * \frac{\text{P}_{\text{min},i}}{\left\lvert\ R_{i,\text{CT}} - R_{i}\right\rvert} \le
+\text{P}_{i} \le 100 * \frac{\text{P}_{\text{max},i}}{\left\lvert R_{i,\text{CT}} - R_{i} \right\rvert} = \text{P}_{i,\text{max}}
 \label{e:rel_bound}
 \end{equation}
 where the \text{CT} subscript indicates values from Cantera.
-Note that the differences in Eq.~\eqref{e:rel_bound} are not subject to the same scrutiny as when computing the net rate of progress, namely because if they were small enough to merit this analysis the error would be minimal anyways.
+The error of a quantity $X_{i,j}$ for state $j$, and index $i$ was determined as:
+\begin{equation}
+ E_{X_{i}} = \left\lVert \left\lVert \frac{\left\lvert X_{i,j,\text{CT}} - X_{i,j}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{i,j,\text{CT}} \right\rvert} \right\rVert_{j,\infty} \right\rVert_{i, \infty}
+\label{e:rel_err}
+\end{equation}
+Finally, to estimate the effect of loss of precision on the net rates of progress, we let $P_{\text{min}}^{*} = P_{i,\text{min}}$ for the $i,j$ value that results in $E_{R_{i}}$.
 
-With this we can properly validate the code against Cantera, as seen in Table~\todo[inline]{this}
+\begin{table}[ht]
+\sisetup{retain-zero-exponent=true}
+\centering
+\begin{tabular}{@{}S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] @{}}
+\toprule
+\multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$E_{R_{i}^{\prime}}$} & \multicolumn{1}{c}{$E_{R_{i}^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R_{i}}$} & \multicolumn{1}{c}{$\text{P}_{\text{min}}^{*}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[C_k]}{\text{d}t}}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[T]}{\text{d}t}}$} \\
+\midrule
+\multicolumn{1}{c}{\ce{H2}\slash~\ce{CO}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 4.66e6 & 2.37e1 & 2.12e5 \\
+\multicolumn{1}{c}{GRI-Mech.~3.0}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 2.67e04 & 2.84e0 & 2.64e4 \\
+\multicolumn{1}{c}{USC-Mech II}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 7.92e00 & 3.22e03 \\
+\bottomrule
+\end{tabular}
+\caption{Summary of rate of progress, species and temperature rate correctness.
+Error statistics are based on the infinity-norm of the relative error detailed in Eq.~\eqref{e:rel_err} for each quantity.
+}
+\label{T:error}
+\end{table}
+
+In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}
+
 
 \subsection{Results}
 \label{S:results}
