@@ -3,6 +3,7 @@ import argparse
 import plot_styles as ps
 import matplotlib.pyplot as plt
 import general_plotting as gp
+import numpy as np
 
 run = data_parser.run
 rundata = data_parser.rundata
@@ -19,7 +20,7 @@ def __compare(r, name, compare_value):
         return True
     return getattr(r, name) == compare_value
 
-def plotter(plot_name='plot.pdf', show=True, **filters):
+def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
     #apply filters
     for f in filters:
         if filters[f] is None:
@@ -45,7 +46,7 @@ def plotter(plot_name='plot.pdf', show=True, **filters):
     diffs = [set([getattr(x, check) for x in plot_data]) for check in diff_check]
     #get # with more than 1 option
     diff_locs = [i for i in range(len(diffs)) if len(diffs[i]) > 1]
-    if any(diff_check[i] == 'vectype' for i in diff_locs):
+    if len(diff_locs) > 1 and any(diff_check[i] == 'vectype' for i in diff_locs):
         #remove vecwidth
         diff_locs.remove(next(i for i in diff_locs if diff_check[i] == 'vecwidth'))
 
@@ -53,7 +54,8 @@ def plotter(plot_name='plot.pdf', show=True, **filters):
         ', '.join(diff_check[i] for i in diff_locs))
     if not diff_locs:
         #regular plot
-        gp.plot(plot_data, to_plot, norm=['runtime'])
+        for plot in to_plot:
+            gp.plot(plot, *gp.process_data(plot_data, plot, reacs_as_x=plot_reacs))
     else:
         loc = diff_locs[0]
         try:
@@ -61,12 +63,34 @@ def plotter(plot_name='plot.pdf', show=True, **filters):
         except:
             diffs = sorted(diffs[loc])
         labels = [ps.pretty_names(diff_check[loc]).format(x) for x in diffs]
+        #first pass - process data
+        x_vals = [None for _ in range(len(diffs))]
+        y_vals = [None for _ in range(len(diffs))]
+        z_vals = [None for _ in range(len(diffs))]
         for i, val in enumerate(diffs):
             match = [x for x in plot_data if getattr(x, diff_check[loc]) == val]
-            gp.plot(match,
-                to_plot, norm=['runtime'], labels=labels, plot_ind=i)
-    plt.ylabel(r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)')
-    plt.xlabel(r'Number of Species in Model')
+            x_vals[i], y_vals[i], z_vals[i] = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+
+        #second pass - normalize
+        if norm:
+            #find the max y for each x
+            for ix in range(len(x_vals[0])):
+                y_max = np.max([y_vals[i][ix] for i in range(len(diffs))])
+                #divide
+                for i in range(len(diffs)):
+                    y_vals[i][ix] = y_max / y_vals[i][ix]
+                    #uncertainty of an inverse is unchanged
+                    #however, we multiply by y_max as we're doing c / y
+                    z_vals[i][ix] = y_max * z_vals[i][ix]
+
+        #and finally plot
+        for i, val in enumerate(diffs):
+            gp.plot('', x_vals[i], y_vals[i], z_vals[i],
+                labels=labels, plot_ind=i)
+
+    xlabel = 'Speedup' if norm else r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
+    plt.ylabel(xlabel)
+    plt.xlabel(r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions'))
     plt.legend(**ps.legend_style)
     ps.finalize()
     if plot_name:
@@ -115,7 +139,7 @@ if __name__ == '__main__':
         type=str)
     parser.add_argument('--plot_name',
         required=False,
-        default='plot.pdf',
+        default='',
         type=str)
     parser.add_argument('--mech',
         required=False,
@@ -133,6 +157,11 @@ if __name__ == '__main__':
         default=False,
         action='store_true'
         )
+    parser.add_argument('--no_norm',
+        dest='norm',
+        action='store_false',
+        required=False,
+        default=True)
     opts = vars(parser.parse_args())
     options = { k : opts[k] for k in opts if opts[k] != None }
     plotter(**options)
