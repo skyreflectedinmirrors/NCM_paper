@@ -10,7 +10,16 @@ data = data_parser.parse_data()
 reacs_as_x = False
 norm = None
 
-def plotter(plot_name='plot.pdf', **filters):
+def __compare(r, name, compare_value):
+    """
+    Specialty comparison function to account for differences
+    in runtypes
+    """
+    if name == 'vecwidth' and r.vectype == 'par':
+        return True
+    return getattr(r, name) == compare_value
+
+def plotter(plot_name='plot.pdf', show=True, **filters):
     #apply filters
     for f in filters:
         if filters[f] is None:
@@ -18,7 +27,7 @@ def plotter(plot_name='plot.pdf', **filters):
         assert any(data[x] for x in data), 'No data matching all filters'
         if f in data[data.keys()[0]][0]._asdict():
             for mech in data:
-                data[mech] = [x for x in data[mech] if getattr(x, f) == filters[f]]
+                data[mech] = [x for x in data[mech] if __compare(x, f, filters[f])]
     #compute data
     for mech in data:
         for run in data[mech]:
@@ -36,14 +45,22 @@ def plotter(plot_name='plot.pdf', **filters):
     diffs = [set([getattr(x, check) for x in plot_data]) for check in diff_check]
     #get # with more than 1 option
     diff_locs = [i for i in range(len(diffs)) if len(diffs[i]) > 1]
-    assert len(diff_locs) <= 1, "Don't know how to create graphs for more than one diff"
+    if any(diff_check[i] == 'vectype' for i in diff_locs):
+        #remove vecwidth
+        diff_locs.remove(next(i for i in diff_locs if diff_check[i] == 'vecwidth'))
+
+    assert len(diff_locs) <= 1, "Don't know how to create graphs for more than one diff: {}".format(
+        ', '.join(diff_check[i] for i in diff_locs))
     if not diff_locs:
         #regular plot
         gp.plot(plot_data, to_plot, norm=['runtime'])
     else:
         loc = diff_locs[0]
-        diffs = sorted(diffs[loc])
-        labels = [diff_check[loc] + ' ' + x for x in diffs]
+        try:
+            diffs = sorted(diffs[loc], key=lambda x: float(x))
+        except:
+            diffs = sorted(diffs[loc])
+        labels = [ps.pretty_names(diff_check[loc]).format(x) for x in diffs]
         for i, val in enumerate(diffs):
             match = [x for x in plot_data if getattr(x, diff_check[loc]) == val]
             gp.plot(match,
@@ -52,6 +69,8 @@ def plotter(plot_name='plot.pdf', **filters):
     plt.xlabel(r'Number of Species in Model')
     plt.legend(**ps.legend_style)
     ps.finalize()
+    if plot_name:
+        plt.savefig(plot_name)
     plt.show()
 
 

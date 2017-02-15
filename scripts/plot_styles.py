@@ -34,12 +34,15 @@ marker_wheel = [('o', True), ('>', True), ('s', True)]
 marker_dict = {x : marker_wheel[i] for i, x in enumerate(default_keys)}
 
 def pretty_names(pname):
-    if pname == 'runtime':
-        return 'Runtime'
-    elif pname == 'comptime':
-        return 'Compilation time'
-    elif pname == 'overhead':
-        return 'Kernel overhead'
+    pname_dict = {'runtime' : 'Runtime',
+        'comptime' : 'Compilation time',
+        'overhead' : 'Kernel Construction Overhead',
+        'vecwidth' : 'Vector Width = {}',
+        'w' : 'Shallow SIMD',
+        'par' : 'SIMT'
+    }
+    if pname in pname_dict:
+        return pname_dict[pname]
     return pname
 
 #color schemes
