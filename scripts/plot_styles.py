@@ -30,7 +30,8 @@ clear_marker_style = {
 }
 
 default_keys = ['runtime', 'comptime', 'overhead']
-marker_wheel = [('o', True), ('>', True), ('s', True)]
+marker_wheel = [('o', True), ('>', True), ('s', True),
+    ('D', True)]
 marker_dict = {x : marker_wheel[i] for i, x in enumerate(default_keys)}
 
 class dummy_formatter(object):

@@ -4,6 +4,7 @@ import plot_styles as ps
 import matplotlib.pyplot as plt
 import general_plotting as gp
 import numpy as np
+import itertools
 
 run = data_parser.run
 rundata = data_parser.rundata
@@ -46,45 +47,70 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
     diffs = [set([getattr(x, check) for x in plot_data]) for check in diff_check]
     #get # with more than 1 option
     diff_locs = [i for i in range(len(diffs)) if len(diffs[i]) > 1]
-    if len(diff_locs) > 1 and any(diff_check[i] == 'vectype' for i in diff_locs):
-        #remove vecwidth
-        diff_locs.remove(next(i for i in diff_locs if diff_check[i] == 'vecwidth'))
-
-    assert len(diff_locs) <= 1, "Don't know how to create graphs for more than one diff: {}".format(
-        ', '.join(diff_check[i] for i in diff_locs))
+    diffs = [x for x in diffs if len(x) > 1]
+    if len(diff_locs) > 2:
+        raise NotImplementedError
     if not diff_locs:
         #regular plot
         for plot in to_plot:
             gp.plot(plot, *gp.process_data(plot_data, plot, reacs_as_x=plot_reacs))
     else:
-        loc = diff_locs[0]
+        #create map dict
+        loc_map = {}
+        for i, diff in enumerate(diffs):
+            for subdiff in diff:
+                loc_map[subdiff] = diff_locs[i]
+
+        #sort
         try:
-            diffs = sorted(diffs[loc], key=lambda x: float(x))
+            diffs = [sorted(diff, key=lambda x: float(x)) for diff in diffs]
         except:
-            diffs = sorted(diffs[loc])
-        labels = [ps.pretty_names(diff_check[loc]).format(x) for x in diffs]
+            diffs = [sorted(diff) for diff in diffs]
+
         #first pass - process data
-        x_vals = [None for _ in range(len(diffs))]
-        y_vals = [None for _ in range(len(diffs))]
-        z_vals = [None for _ in range(len(diffs))]
-        for i, val in enumerate(diffs):
-            match = [x for x in plot_data if getattr(x, diff_check[loc]) == val]
-            x_vals[i], y_vals[i], z_vals[i] = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+        x_vals = []
+        y_vals = []
+        z_vals = []
+        labels = []
+
+        #handle 2 diffs
+        if len(diffs) == 1:
+            for val in [subdiff for diff in diffs for subdiff in diff]:
+                check = diff_check[loc_map[val]]
+                match = [x for x in plot_data if __compare(x, check, val)]
+                if match:
+                    labels.append(ps.pretty_names(check).format(val))
+                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+                    x_vals.append(x); y_vals.append(y); z_vals.append(z)
+        else:
+            iterator = [zip(x,diffs[1]) for x in itertools.permutations(diffs[0],len(diffs[1]))]
+            iterator = [subiter for i in iterator for subiter in i]
+            for val1, val2 in iterator:
+                match = [x for x in plot_data if __compare(x, diff_check[loc_map[val1]], val1)
+                    and __compare(x, diff_check[loc_map[val2]], val2)]
+                if match:
+                    labels.append(val1 + ' - ' + val2)
+                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+                    x_vals.append(x)
+                    y_vals.append(y)
+                    z_vals.append(z)
+
 
         #second pass - normalize
         if norm:
+            xlen = len(next(x for x in x_vals if x))
             #find the max y for each x
-            for ix in range(len(x_vals[0])):
-                y_max = np.max([y_vals[i][ix] for i in range(len(diffs))])
+            for ix in range(xlen):
+                y_max = np.max([y_vals[i][ix] for i in range(len(y_vals)) if y_vals[i]])
                 #divide
-                for i in range(len(diffs)):
+                for i in range(len(y_vals)):
                     y_vals[i][ix] = y_max / y_vals[i][ix]
                     #uncertainty of an inverse is unchanged
                     #however, we multiply by y_max as we're doing c / y
                     z_vals[i][ix] = y_max * z_vals[i][ix]
 
         #and finally plot
-        for i, val in enumerate(diffs):
+        for i in range(len(y_vals)):
             gp.plot('', x_vals[i], y_vals[i], z_vals[i],
                 labels=labels, plot_ind=i)
 
