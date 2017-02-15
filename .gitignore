@@ -218,3 +218,9 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+
+#python stuff
+*.pyc
+
+#tars
+*.tar
