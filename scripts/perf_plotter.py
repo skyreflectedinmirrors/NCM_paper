@@ -8,10 +8,11 @@ import general_plotting as gp
 import numpy as np
 import itertools
 import functools
+import copy
 
 run = data_parser.run
 rundata = data_parser.rundata
-data = data_parser.parse_data()
+data_clean = data_parser.parse_data()
 reacs_as_x = False
 norm = None
 
@@ -37,7 +38,9 @@ def __compare(r, name, compare_value, plot_cores=False):
     return rgetattr(r, name) == compare_value
 
 def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
-        legend_handler=None, marker_func=None, **filters):
+        legend_handler=None, marker_func=None,
+        minx=None, miny=None, maxx=None, maxy=None, **filters):
+    data = copy.copy(data_clean)
     #create fig, ax
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
@@ -71,12 +74,13 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
     plot_cores = False
     if 'cores' in [diff_check[loc] for loc in diff_locs]:
         #can only process one
-        assert len(diff_locs) == 1
-        diffs = [sorted(data.keys())]
-        diff_locs = [-1]
-        diff_check.append('mechdata.mech')
-        plot_reacs = False
-        plot_cores = True
+        plot_cores = len(diff_locs) == 1
+        if plot_cores:
+            diffs = [sorted(data.keys())]
+            diff_locs = [-1]
+            diff_check.append('mechdata.mech')
+            plot_reacs = False
+            plot_cores = True
 
     #delete diff for vecwidth / par thing
     if 'vectype' in [diff_check[loc] for loc in diff_locs]:
@@ -143,7 +147,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
                     x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs, plot_cores=plot_cores)
                     x_vals.append(x); y_vals.append(y); z_vals.append(z)
         else:
-            iterator = [zip(x,diffs[1]) for x in itertools.permutations(diffs[0],len(diffs[1]))]
+            iterator = [zip(x,diffs[1]) for x in itertools.permutations(diffs[0],len(diffs[0]))]
             iterator = [subiter for i in iterator for subiter in i]
             for val1, val2 in iterator:
                 match = [x for x in plot_data if __compare(x, diff_check[loc_map[val1]], val1, plot_cores=plot_cores)
@@ -163,11 +167,10 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
                 y_max = np.max([y_vals[i][ix] for i in range(len(y_vals)) if y_vals[i]])
                 #divide
                 for i in range(len(y_vals)):
+                    z_vals[i][ix] = (z_vals[i][ix] / y_vals[i][ix]) * (y_max / y_vals[i][ix])
                     y_vals[i][ix] = y_max / y_vals[i][ix]
-                    #uncertainty of an inverse is unchanged
-                    #however, we multiply by y_max as we're doing c / y
-                    z_vals[i][ix] = y_max * z_vals[i][ix]
-        else:
+
+        elif norm:
             #parallel scaling eff
             for ix in range(len(x_vals)):
                 for i in range(1, len(x_vals[ix])):
@@ -186,6 +189,8 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         for i in range(len(y_vals)):
             gp.plot('', x_vals[i], y_vals[i], z_vals[i],
                 labels=labels, plot_ind=i, marker_func=marker_func)
+        ax.set_xlim([minx, maxx])
+        ax.set_ylim([miny, maxy])
 
     ylabel = r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
     xlabel = r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions')
@@ -257,7 +262,7 @@ if __name__ == '__main__':
         required=False,
         default=None,
         type=str,
-        choices=data.keys()
+        choices=data_clean.keys()
         )
     parser.add_argument('--plot_compilation',
         required=False,

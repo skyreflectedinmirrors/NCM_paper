@@ -39,7 +39,7 @@ def process_data(plotdata, plot, reacs_as_x=True,
     return x_vals, y_vals, err_vals
 
 
-def plot(plot, x_vals, y_vals, err_vals, minx=None, miny=None, plot_std=True,
+def plot(plot, x_vals, y_vals, err_vals, minx=None, miny=None, maxx=None, maxy=None, plot_std=True,
         return_y=False, labels=[], plot_ind=None, marker_func=None):
     """Plot performance as a function of reaction count.
     """
@@ -80,18 +80,17 @@ def plot(plot, x_vals, y_vals, err_vals, minx=None, miny=None, plot_std=True,
 
     this_minx = np.min(x_vals)
     this_miny = np.min(y_vals)
-    minx = (this_minx if minx is None
-            else this_minx if this_minx < minx
-            else minx
-            )
-    miny = (this_miny if miny is None
-            else this_miny if this_miny < miny
-            else miny
-            )
-    retval = minx, miny
-    if return_y:
-        retval = (retval, y_vals, err_vals)
-    return retval
+    def __get_min(test, inval):
+        return test if inval is None else (
+            test if test < inval else inval)
+    def __get_max(test, inval):
+        return test if inval is None else (
+            test if test > inval else inval)
+    minx = __get_min(np.min(x_vals), minx)
+    miny = __get_min(np.min(y_vals), miny)
+    maxx = __get_min(np.max(x_vals), maxx)
+    maxy = __get_min(np.max(y_vals), maxy)
+    return minx, miny, maxx, maxy
 
 
 def plot_scaling(plotdata, markerlist, colorlist, minx=None, miny=None,

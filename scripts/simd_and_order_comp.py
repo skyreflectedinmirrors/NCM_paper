@@ -7,8 +7,8 @@ SIMD_color = ps.color_wheel[0]
 SIMT_color = ps.color_wheel[1]
 SIMT_sym = ps.marker_wheel[0][0]
 SIMD_sym = ps.marker_wheel[1][0]
-C_filled = True
-F_filled = False
+C_hollow = False
+F_hollow = True
 
 def marker_func(name):
     retval = []
@@ -17,9 +17,9 @@ def marker_func(name):
     else:
         retval.append(SIMD_sym)
     if 'C-order' in name:
-        retval.append(C_filled)
+        retval.append(C_hollow)
     else:
-        retval.append(F_filled)
+        retval.append(F_hollow)
     if 'SIMT' in name:
         retval.append(SIMT_color)
     else:
@@ -41,6 +41,6 @@ handles = [mlines.Line2D([], [], color=SIMT_color, marker=SIMT_sym, linestyle=''
                           label='F-order', markerfacecolor='none', markeredgecolor='k')]
 legend = (handles, labels)
 
-fig, ax = pp.plotter(show=True,
+pp.plotter(show=True,
     cores='1', vecwidth='8', rates='hybrid', kernel='split',
     legend_handler=legend, marker_func=marker_func)

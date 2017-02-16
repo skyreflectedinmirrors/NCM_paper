@@ -22,6 +22,7 @@
 \usepackage{amsmath}
 \usepackage[version=3]{mhchem} % Formula subscripts using \ce{}, e.g., \ce{H2SO4}
 \usepackage{booktabs,multicol} %better tables
+\usepackage{subcaption} %subfigs
 \sisetup{group-separator={,},
 	detect-all,
 	binary-units,
@@ -83,10 +84,10 @@ While central processing unit (CPU) clock speeds have increased rapidly over the
 Traditional multi-core parallelism is often used to increase CPU performance, however SIMD processors---and the related Single Instruction, Multiple Thread (SIMT) processors, e.g. graphics processing units (GPUs)---have gained recognition due to their increased floating operation throughput.
 The parallel programming standard OpenCL~\cite{stone2010opencl} has further enabled adoption of vector-processing based codes in scientific computing by providing a common application program interface (API) for execution on heterogeneous systems (e.g. CPU, GPU, etc.).
 
-\begin{figure}[ht]
+\begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.33\linewidth]{SIMD.pdf}
-	\caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data. Adapted from\cite{Simdfig:2016}}
+	\caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data.}
 	\label{F:SIMD}
 \end{figure}
 
@@ -165,7 +166,7 @@ For a more direct comparison, a relative error norm of a quantity $X_{i,j}$ over
 \end{equation}
 and the lower precision bound for the net rate of progress error norm is set to $P_{\text{min}}^{*} = P_{i,\text{min}}$ for the $i, j$ value that results in the maximum error $E_{R_i}$.
 
-\begin{table}[ht]
+\begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
 \centering
 \begin{tabular}{@{}S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] @{}}
@@ -184,7 +185,7 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 \label{T:error}
 \end{table}
 
-In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
+In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
 Very close agreement is observed for the forward and reverse ROP for all models, however the net rate of progress is \numrange{7}{8} orders of magnitude larger.
 We see here that the minimum estimated loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP, explaining this jump.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
@@ -192,6 +193,21 @@ We note that the above discussion does not imply that computation of the net ROP
 
 \subsection{Results}
 \label{S:results}
+The performance studies in this work were run on four ten-core \SI{2.2}{\giga\hertz} Intel Xeon E5-4640 v2 CPUs with \SI{20}{\mega\byte} of L3 cache memory, installed on an Ace Powerworks PW8027R-TRF+ with a Supermicro X9QR7-TF+/X9QRi-F+ baseboard.
+Runtimes in each case were averaged over ten runs, each using the same set of PaSR conditions utilized in validation.
+All code was compiled with \texttt{gcc 4.8.5} and ``\texttt{-O3}'' optimization, running on \texttt{v16.1.1} of the Intel OpenCL runtime supporting OpenCL \texttt{v1.2}.
+
+\begin{figure}[htb]
+  \centering
+  \begin{subfigure}[t]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{SIMD_SIMT_Order_comparison.pdf}
+    \caption{}
+    \label{F:SIMDComp}
+  \end{subfigure}
+  ~
+  
+\end{figure}
+
 
 
 \label{results}
