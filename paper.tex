@@ -127,13 +127,15 @@ This is a direction that may be explored in the future to compare the speedups o
 
 \subsection{Data Ordering and Vectorization Patterns}
 For a chemical kinetic model with species $k$ for the $j$-th thermo-chemical state to be evaluated, $[C_k]_j$ there are two choices for data-storage in memory.
-In the ``C'' (row-major) format, species concentrations for $j$-th thermo-chemical state are stored sequentially in memory, i.e.: $[C_0]_0\text{,}\allowbreak C[1]_0\ldots\allowbreak [C_{N_S}]_0\text{,}\allowbreak [C_0]_1\allowbreak\ldots\allowbreak [C_{N_S}]_N$, where $N$ is the total number of thermo-chemical conditions.
-Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for all thermo-chemical states are sequential, i.e.: $[C_0]_0\text{,}\allowbreak[C_0]_1\ldots\allowbreak[C_0]_N\text{,}\allowbreak[C_1]_0\ldots\allowbreak[C_{N_S}]_N$
+In the ``C'' (C row-major) format, species concentrations for $j$-th thermo-chemical state are stored sequentially in memory.
+Alternatively, in the ``F'' (Fortan column-major) format species concentrations a single species for over all thermo-chemical states are adjacent in memory.
 In Sec.~\ref{S:results} the effect of this ordering will be shown to have a large performance impact on the program runtime.
 
-In this work, a \textit{shallow}-SIMD vectorization has been implemented, entailing each SIMD-lane evaluating the species rates for an thermo-chemical state independently.
+In this work, a \textit{shallow}-SIMD vectorization has been implemented, entailing each SIMD-lane evaluating chemical source terms for an thermo-chemical state independently.
 In future efforts, a so called \textit{deep}-SIMD vectorization will be pursued allowing vector-units to cooperate to evaluate species rates for a single thermo-chemical state.
-A deep-vectorization may result in SIMD-\textit{waste} in this context---similar to thread-divergence in SIMT-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds), however past studies demonstrate the merits of deep-SIMT vectorization on GPUs~\cite{Sewerin20151375}.
+A deep-vectorization may result in SIMD-\textit{waste} in this context---similar to thread-divergence in SIMT-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds).
+However a deep-vectorization will likely have higher cache hit-rates than a shallow-vectorization using the ``C'' memory layout as successive SIMD-lanes would access directly memory adjacent locations.
+Additionally, past studies demonstrate the merits of deep-SIMT vectorization on GPUs~\cite{Sewerin20151375}.
 
 \section{Results and Discussion}
 \subsection{Validation}
@@ -177,6 +179,7 @@ and the lower precision bound for the net rate of progress error norm is set to 
 \end{tabular}
 \caption{Summary of rate of progress, species and temperature rate correctness.
 Error statistics are based on the infinity-norm of the relative error detailed in Eq.~\eqref{e:rel_err} for each quantity.
+\todo[inline]{i-pentanol validation still running}
 }
 \label{T:error}
 \end{table}
