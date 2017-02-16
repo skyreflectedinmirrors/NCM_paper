@@ -116,7 +116,7 @@ For further detail on each term, the reader is referred to our previous work~\ci
 
 In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: in this context, the ``constant-pressure assumption'' refers to evaluation within a reaction sub-step in the operator splitting scheme, rather than a general constant-pressure reactive-flow simulation.} is evaluated as:
 \begin{equation}
-\frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \dot{\omega}_k}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
+\frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \frac{\text{d}[C_k]}{\text{d}t}}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
 \end{equation}
 although the code is equally capable of a evaluating the temperature rate using a constant-volume assumption, we omit this here for brevity.
 
@@ -137,36 +137,38 @@ A deep-vectorization may result in SIMD-\textit{waste} in this context---similar
 
 \section{Results and Discussion}
 \subsection{Validation}
-The reaction rates of progress, species and temperature rates in this study are validated by comparison to Cantera~\cite{Cantera}, however due to the intricacies of floating point arithmetic care must be taken when comparing results.
+The reaction rates of progress (ROP), species and temperature rates in this study are validated by comparison with Cantera~\cite{Cantera}, however special care must be taken due floating point arithmetic issues
 
-In obtaining the net rate of progress of reaction $i$ from the forward and reverse rates of progress, $R_{i} = R_{i}^{\prime} - R_{i}^{\prime\prime}$, a base-10 bound on the loss of precision can be found as~\cite{goldberg1991every}:
+In computing the net rate of progress of reaction $i$ from the forward and reverse ROP: $R_{i} = R_{i}^{\prime} - R_{i}^{\prime\prime}$, precision can easily be lost as the net rate of progress may be---particularly near chemical equilibrium---many orders of magnitude smaller than the forward or reverse rates.
+A base-ten bound on loss of precision~\cite{goldberg1991every} can be found as:
 \begin{equation}
-2^{-p_i} \le \left\lvert 1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}} \right\rvert \le 2^{-q_i}
+\text{P}_{\text{min},i} = 2^{-p_i} \le \left\lvert 1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}} \right\rvert \le 2^{-q_i} = \text{P}_{\text{max},i}
 \label{e:bounds}
 \end{equation}
-with $q_i \le p_i$, while $1 - \frac{R_{i}^{\prime}}{R_{i}^{\prime\prime}}$ can be computed with accurately via use of higher-precision numbers (in this case, via use of Python's Decimal class).
-
-Plugging the forward and reverse rate constants from Cantera into Eq.~\eqref{e:bounds} we can obtain a reasonable a-priori precision bounds $\text{P}_{\text{min},i} = 2^{-p_i}$, $\text{P}_{\text{max},i} = 2^{-q_i}$.
-Finally, when determining the error in the net rates of progress between this code and Cantera, the range of percent error attributable to precision loss, $\text{P}_{\text{err},i}$ can be found as:
+with $q_i \le p_i$.
+To obtain an estimate of the a-priori precision bounds ($\text{P}_{\text{min},i}$ and $\text{P}_{\text{max},i}$), the forward and reverse ROP from Cantera are substituted into Eq.~\eqref{e:bounds}.
+Additionally a higher-precision number format (in this case, the Python Decimal class) is used in this computation to maintain accuracy.
+Finally, when determining the error in the net ROP between this code and Cantera, the bounds on the percent error attributable to precision loss, $\text{P}_{\text{err},i}$ can be estimated as:
 \begin{equation}
 \text{P}_{i,\text{min}} = 100 * \frac{\text{P}_{\text{min},i}}{\left\lvert\ R_{i,\text{CT}} - R_{i}\right\rvert} \le
 \text{P}_{i} \le 100 * \frac{\text{P}_{\text{max},i}}{\left\lvert R_{i,\text{CT}} - R_{i} \right\rvert} = \text{P}_{i,\text{max}}
 \label{e:rel_bound}
 \end{equation}
 where the \text{CT} subscript indicates values from Cantera.
-The error of a quantity $X_{i,j}$ for state $j$, and index $i$ was determined as:
+
+For a more direct comparison, a relative error norm of a quantity $X_{i,j}$ over all states $j$, and indices $i$ was computed using the $L^{\infty}$ norm:
 \begin{equation}
- E_{X_{i}} = \left\lVert \left\lVert \frac{\left\lvert X_{i,j,\text{CT}} - X_{i,j}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{i,j,\text{CT}} \right\rvert} \right\rVert_{j,\infty} \right\rVert_{i, \infty}
+ E_{X_{i}} = \left\lVert \frac{\left\lvert X_{i,j,\text{CT}} - X_{i,j}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{i,j,\text{CT}} \right\rvert} \right\rVert_{i,j,\infty}
 \label{e:rel_err}
 \end{equation}
-Finally, to estimate the effect of loss of precision on the net rates of progress, we let $P_{\text{min}}^{*} = P_{i,\text{min}}$ for the $i,j$ value that results in $E_{R_{i}}$.
+and the lower precision bound for the net rate of progress error norm is set to $P_{\text{min}}^{*} = P_{i,\text{min}}$ for the $i, j$ value that results in the maximum error $E_{R_i}$.
 
 \begin{table}[ht]
 \sisetup{retain-zero-exponent=true}
 \centering
 \begin{tabular}{@{}S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] @{}}
 \toprule
-\multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$E_{R_{i}^{\prime}}$} & \multicolumn{1}{c}{$E_{R_{i}^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R_{i}}$} & \multicolumn{1}{c}{$\text{P}_{\text{min}}^{*}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[C_k]}{\text{d}t}}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[T]}{\text{d}t}}$} \\
+\multicolumn{1}{c}{Model} & \multicolumn{1}{c}{$E_{R_{i}^{\prime}}$} & \multicolumn{1}{c}{$E_{R_{i}^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R_{i}}$} & \multicolumn{1}{c}{$\text{P}_{\text{min}}^{*}\si{\percent}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[C_k]}{\text{d}t}}$} & \multicolumn{1}{c}{$E_{\frac{\text{d}[T]}{\text{d}t}}$} \\
 \midrule
 \multicolumn{1}{c}{\ce{H2}\slash~\ce{CO}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 4.66e6 & 2.37e1 & 2.12e5 \\
 \multicolumn{1}{c}{GRI-Mech.~3.0}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 2.67e04 & 2.84e0 & 2.64e4 \\
@@ -179,8 +181,11 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 \label{T:error}
 \end{table}
 
-In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}
-
+In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
+Very close agreement is observed for the forward and reverse ROP for all models, however the net rate of progress is \numrange{7}{8} orders of magnitude larger.
+We see here that the minimum estimated loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP, explaining this jump.
+The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
+We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera---as this loss of precision only occurs when the net ROP are many orders of magnitude smaller than the forward or reverse rates, implying the reaction is in near-equilibrium.
 
 \subsection{Results}
 \label{S:results}
