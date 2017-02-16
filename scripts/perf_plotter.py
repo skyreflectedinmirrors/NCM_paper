@@ -1,3 +1,5 @@
+from __future__ import division
+
 import data_parser
 import argparse
 import plot_styles as ps
@@ -5,6 +7,7 @@ import matplotlib.pyplot as plt
 import general_plotting as gp
 import numpy as np
 import itertools
+import functools
 
 run = data_parser.run
 rundata = data_parser.rundata
@@ -12,14 +15,26 @@ data = data_parser.parse_data()
 reacs_as_x = False
 norm = None
 
-def __compare(r, name, compare_value):
+#from http://stackoverflow.com/a/31174427
+sentinel = object()
+def rgetattr(obj, attr, default=sentinel):
+    if default is sentinel:
+        _getattr = getattr
+    else:
+        def _getattr(obj, name):
+            return getattr(obj, name, default)
+    return functools.reduce(_getattr, [obj]+attr.split('.'))
+
+def __compare(r, name, compare_value, plot_cores=False):
     """
     Specialty comparison function to account for differences
     in runtypes
     """
     if name == 'vecwidth' and r.vectype == 'par':
         return True
-    return getattr(r, name) == compare_value
+    if plot_cores and name == 'cores':
+        return True
+    return rgetattr(r, name) == compare_value
 
 def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
     #apply filters
@@ -48,6 +63,19 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
     #get # with more than 1 option
     diff_locs = [i for i in range(len(diffs)) if len(diffs[i]) > 1]
     diffs = [x for x in diffs if len(x) > 1]
+
+    plot_cores = False
+    if 'cores' in [diff_check[loc] for loc in diff_locs]:
+        #can only process one
+        assert len(diff_locs) == 1
+        diffs = [sorted(data.keys())]
+        diff_locs = [-1]
+        diff_check.append('mechdata.mech')
+        plot_reacs = False
+        plot_cores = True
+
+    #delete diff
+
     if len(diff_locs) > 2:
         raise NotImplementedError
     if not diff_locs:
@@ -77,27 +105,26 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
         if len(diffs) == 1:
             for val in [subdiff for diff in diffs for subdiff in diff]:
                 check = diff_check[loc_map[val]]
-                match = [x for x in plot_data if __compare(x, check, val)]
+                match = [x for x in plot_data if __compare(x, check, val, plot_cores=plot_cores)]
                 if match:
                     labels.append(ps.pretty_names(check).format(val))
-                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs, plot_cores=plot_cores)
                     x_vals.append(x); y_vals.append(y); z_vals.append(z)
         else:
             iterator = [zip(x,diffs[1]) for x in itertools.permutations(diffs[0],len(diffs[1]))]
             iterator = [subiter for i in iterator for subiter in i]
             for val1, val2 in iterator:
-                match = [x for x in plot_data if __compare(x, diff_check[loc_map[val1]], val1)
+                match = [x for x in plot_data if __compare(x, diff_check[loc_map[val1]], val1, plot_cores=plot_cores)
                     and __compare(x, diff_check[loc_map[val2]], val2)]
                 if match:
                     labels.append(val1 + ' - ' + val2)
-                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs)
+                    x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs, plot_cores=plot_cores)
                     x_vals.append(x)
                     y_vals.append(y)
                     z_vals.append(z)
 
-
         #second pass - normalize
-        if norm:
+        if norm and not plot_cores:
             xlen = len(next(x for x in x_vals if x))
             #find the max y for each x
             for ix in range(xlen):
@@ -108,15 +135,37 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
                     #uncertainty of an inverse is unchanged
                     #however, we multiply by y_max as we're doing c / y
                     z_vals[i][ix] = y_max * z_vals[i][ix]
+        else:
+            #parallel scaling eff
+            for ix in range(len(x_vals)):
+                for i in range(1, len(x_vals[ix])):
+                    #scaling eff is t1 / (N * tN)
+                    y_vals[ix][i] = y_vals[ix][0] / (x_vals[ix][i] * y_vals[ix][i])
+                    #update uncertainty
+                    z_vals[ix][i] = y_vals[ix][i] * np.sqrt(np.power(z_vals[ix][0] / y_vals[ix][0], 2) +
+                        np.power(z_vals[ix][i] / y_vals[ix][i], 2))
+                #remove first entry (1 core)
+                assert x_vals[ix][0] == 1
+                x_vals[ix] = x_vals[ix][1:]
+                y_vals[ix] = y_vals[ix][1:]
+                z_vals[ix] = z_vals[ix][1:]
 
         #and finally plot
         for i in range(len(y_vals)):
             gp.plot('', x_vals[i], y_vals[i], z_vals[i],
                 labels=labels, plot_ind=i)
 
-    xlabel = 'Speedup' if norm else r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
-    plt.ylabel(xlabel)
-    plt.xlabel(r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions'))
+    ylabel = r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
+    xlabel = r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions')
+    if norm:
+        ylabel = 'Speedup'
+        if plot_cores:
+            ylabel = 'Strong Parallel Scaling'
+    if plot_cores:
+        xlabel = 'Number of Cores'
+
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
     plt.legend(**ps.legend_style)
     ps.finalize()
     if plot_name:

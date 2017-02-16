@@ -9,7 +9,7 @@ import os.path
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 plt.rc('text.latex',
-    preamble=r'\usepackage{amsmath},\usepackage{siunitx}')
+    preamble=r'\usepackage{amsmath},\usepackage{siunitx},\usepackage[version=3]{mhchem}')
 plt.rc('font', family='serif')
 
 legend_style = {'loc':0,
@@ -60,7 +60,8 @@ def pretty_names(pname):
             'split' : 'Split Rate Kernels'}),
         'rates' : dummy_formatter({'fixed' : 'Fixed Rate Specialization',
             'hybrid' : 'Hybrid Rate Specialization',
-            'full' : 'Full Rate Specialization'})
+            'full' : 'Full Rate Specialization'}),
+        'mechdata.mech' : r'\ce{{{}}}' #used in core plotting
     }
     if pname in pname_dict:
         return pname_dict[pname]

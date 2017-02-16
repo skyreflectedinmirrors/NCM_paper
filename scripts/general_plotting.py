@@ -12,13 +12,17 @@ legend_key = {'H2':r'H$_2$/CO',
               'IC5H11OH':r'IC$_5$H$_{11}$OH'
               }
 
-def process_data(plotdata, plot, reacs_as_x=True):
+def process_data(plotdata, plot, reacs_as_x=True,
+    plot_cores=False):
     """
     Process the data into an easily usable form
     """
     if reacs_as_x:
         plotdata = sorted(plotdata, key=lambda x: x.mechdata.num_reactions)
         x_vals = [x.mechdata.num_reactions for x in plotdata]
+    elif plot_cores:
+        plotdata = sorted(plotdata, key=lambda x: float(x.cores))
+        x_vals = [float(x.cores) for x in plotdata]
     else:
         plotdata = sorted(plotdata, key=lambda x: x.mechdata.num_species)
         x_vals = [x.mechdata.num_species for x in plotdata]
