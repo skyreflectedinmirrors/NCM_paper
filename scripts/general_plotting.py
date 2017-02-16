@@ -40,12 +40,14 @@ def process_data(plotdata, plot, reacs_as_x=True,
 
 
 def plot(plot, x_vals, y_vals, err_vals, minx=None, miny=None, plot_std=True,
-    return_y=False, labels=[], plot_ind=None
-         ):
+        return_y=False, labels=[], plot_ind=None, marker_func=None):
     """Plot performance as a function of reaction count.
     """
 
-    if plot_ind is not None:
+    if marker_func is not None:
+        name = labels[plot_ind]
+        marker, hollow, color = marker_func(name)
+    elif plot_ind is not None:
         assert labels
         marker, hollow = ps.marker_wheel[plot_ind]
         color = ps.color_wheel[plot_ind]

@@ -46,7 +46,7 @@ class dummy_formatter(object):
         return next(self.values[i] for i, x in enumerate(self.choices)
             if x == val)
 
-def pretty_names(pname):
+def pretty_names(pname, short=False):
     pname_dict = {'runtime' : 'Runtime',
         'comptime' : 'Compilation time',
         'overhead' : 'Kernel Construction Overhead',

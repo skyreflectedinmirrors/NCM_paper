@@ -36,7 +36,11 @@ def __compare(r, name, compare_value, plot_cores=False):
         return True
     return rgetattr(r, name) == compare_value
 
-def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
+def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
+        legend_handler=None, marker_func=None, **filters):
+    #create fig, ax
+    fig = plt.figure()
+    ax = plt.subplot(1,1,1)
     #apply filters
     for f in filters:
         if filters[f] is None:
@@ -51,9 +55,9 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
             rund = run.rundata
     #now plot data
     to_plot = ['runtime']
-    if filters['plot_compilation']:
+    if filters.pop('plot_compilation', False):
         to_plot.append('comptime')
-    if filters['plot_overhead']:
+    if filters.pop('plot_overhead', False):
         to_plot.append('overhead')
     #get data
     plot_data = [x for mech in data for x in data[mech]]
@@ -107,6 +111,28 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
         z_vals = []
         labels = []
 
+        def __get_compound_names(val1, val2):
+            c1 = diff_check[loc_map[val1]]
+            c2 = diff_check[loc_map[val2]]
+
+            #generic name ordering
+            ordering = ['vectype', 'order']
+
+            #sort by order
+            check_vals = [None for _ in diff_check]
+            check_vals[loc_map[val1]] = c1
+            check_vals[loc_map[val2]] = c2
+            check_vals = sorted(check_vals,
+                key=lambda x: 100 if x not in ordering else ordering.index(x))
+
+            #remove none
+            check_vals = [x for x in check_vals if x is not None]
+
+            #and return str
+            return ' - '.join(ps.pretty_names(check).format(val1 if check == c1 else val2)
+                for check in check_vals)
+
+
         #handle 2 diffs
         if len(diffs) == 1:
             for val in [subdiff for diff in diffs for subdiff in diff]:
@@ -123,7 +149,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
                 match = [x for x in plot_data if __compare(x, diff_check[loc_map[val1]], val1, plot_cores=plot_cores)
                     and __compare(x, diff_check[loc_map[val2]], val2)]
                 if match:
-                    labels.append(val1 + ' - ' + val2)
+                    labels.append(__get_compound_names(val1, val2))
                     x, y, z = gp.process_data(match, 'runtime', reacs_as_x=plot_reacs, plot_cores=plot_cores)
                     x_vals.append(x)
                     y_vals.append(y)
@@ -159,7 +185,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
         #and finally plot
         for i in range(len(y_vals)):
             gp.plot('', x_vals[i], y_vals[i], z_vals[i],
-                labels=labels, plot_ind=i)
+                labels=labels, plot_ind=i, marker_func=marker_func)
 
     ylabel = r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
     xlabel = r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions')
@@ -172,11 +198,16 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
 
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
-    plt.legend(**ps.legend_style)
+    if legend_handler:
+        plt.legend(*legend_handler, **ps.legend_style).draggable()
+    else:
+        plt.legend(**ps.legend_style)
     ps.finalize()
     if plot_name:
         plt.savefig(plot_name)
-    plt.show()
+    if show:
+        plt.show()
+    return fig, ax
 
 
 if __name__ == '__main__':
