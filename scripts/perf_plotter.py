@@ -74,7 +74,12 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True, **filters):
         plot_reacs = False
         plot_cores = True
 
-    #delete diff
+    #delete diff for vecwidth / par thing
+    if 'vectype' in [diff_check[loc] for loc in diff_locs]:
+        ind = next(i for i, loc in enumerate(diff_locs)
+            if diff_check[loc] == 'vecwidth')
+        diffs.pop(ind)
+        diff_locs.pop(ind)
 
     if len(diff_locs) > 2:
         raise NotImplementedError
