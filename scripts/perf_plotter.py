@@ -202,7 +202,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         ax.set_xlim([minx, maxx])
         ax.set_ylim([miny, maxy])
 
-    ylabel = r'Runtime ($\frac{\si{\milli\second}}{\text{state}}$)'
+    ylabel = r'Runtime (\si{\milli\second} / state)'
     xlabel = r'Number of {} in Model'.format('Species' if not plot_reacs else 'Reactions')
     if norm:
         ylabel = 'Speedup'

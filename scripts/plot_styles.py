@@ -13,7 +13,7 @@ plt.rc('text.latex',
 plt.rc('font', family='serif')
 
 legend_style = {'loc':0,
-    'fontsize':16,
+    'fontsize':18,
     'numpoints':1,
     'shadow':True,
     'fancybox':True
