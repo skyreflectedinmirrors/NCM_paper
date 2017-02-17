@@ -7,12 +7,6 @@ import plot_styles as ps
 
 font_size = 'large'
 
-legend_key = {'H2':r'H$_2$/CO',
-              'CH4':r'GRI-Mech 3.0',
-              'C2H4':r'USC-Mech II',
-              'IC5H11OH':r'IC$_5$H$_{11}$OH'
-              }
-
 def process_data(plotdata, plot, reacs_as_x=True,
     plot_cores=False):
     """

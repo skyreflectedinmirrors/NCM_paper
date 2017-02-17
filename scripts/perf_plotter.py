@@ -109,7 +109,12 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         try:
             diffs = [sorted(diff, key=lambda x: float(x)) for diff in diffs]
         except:
-            diffs = [sorted(diff) for diff in diffs]
+            if plot_cores:
+                #sort by mech size
+                diffs = [sorted(diff, key=lambda x:
+                    data[x][0].mechdata.num_reactions) for diff in diffs]
+            else:
+                diffs = [sorted(diff) for diff in diffs]
 
         #first pass - process data
         x_vals = []

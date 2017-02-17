@@ -46,6 +46,12 @@ class dummy_formatter(object):
         return next(self.values[i] for i, x in enumerate(self.choices)
             if x == val)
 
+legend_key = {'H2':r'H$_2$/CO',
+              'CH4':r'GRI-Mech 3.0',
+              'C2H4':r'USC-Mech II',
+              'IC5H11OH':r'IC$_5$H$_{11}$OH'
+              }
+
 def pretty_names(pname, short=False):
     pname_dict = {'runtime' : 'Runtime',
         'comptime' : 'Compilation time',
@@ -61,7 +67,7 @@ def pretty_names(pname, short=False):
         'rates' : dummy_formatter({'fixed' : 'Fixed Rate Specialization',
             'hybrid' : 'Hybrid Rate Specialization',
             'full' : 'Full Rate Specialization'}),
-        'mechdata.mech' : r'\ce{{{}}}' #used in core plotting
+        'mechdata.mech' : dummy_formatter(legend_key)
     }
     if pname in pname_dict:
         return pname_dict[pname]
