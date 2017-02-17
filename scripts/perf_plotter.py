@@ -39,7 +39,8 @@ def __compare(r, name, compare_value, plot_cores=False):
 
 def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         legend_handler=None, marker_func=None,
-        minx=None, miny=None, maxx=None, maxy=None, **filters):
+        minx=None, miny=None, maxx=None, maxy=None, ylog=False,
+        return_vals=False, **filters):
     data = copy.copy(data_clean)
     #create fig, ax
     fig = plt.figure()
@@ -82,6 +83,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
             plot_reacs = False
             plot_cores = True
 
+    retval = None
     #delete diff for vecwidth / par thing
     if 'vectype' in [diff_check[loc] for loc in diff_locs]:
         ind = next((i for i, loc in enumerate(diff_locs)
@@ -159,6 +161,11 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
                     y_vals.append(y)
                     z_vals.append(z)
 
+        if return_vals:
+            def __copy_arr(val):
+                return [v[:] for v in val]
+            retval = [__copy_arr(x_vals), __copy_arr(y_vals), __copy_arr(z_vals), copy.copy(labels)]
+
         #second pass - normalize
         if norm and not plot_cores:
             xlen = len(next(x for x in x_vals if x))
@@ -184,6 +191,9 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
                 x_vals[ix] = x_vals[ix][1:]
                 y_vals[ix] = y_vals[ix][1:]
                 z_vals[ix] = z_vals[ix][1:]
+
+        if ylog:
+            ax.set_yscale('log')
 
         #and finally plot
         for i in range(len(y_vals)):
@@ -212,7 +222,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         plt.savefig(plot_name)
     if show:
         plt.show()
-    return fig, ax
+    return retval
 
 
 if __name__ == '__main__':

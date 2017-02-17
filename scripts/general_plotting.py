@@ -1,5 +1,6 @@
 """Module with
 """
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import plot_styles as ps
@@ -30,12 +31,13 @@ def process_data(plotdata, plot, reacs_as_x=True,
     y_vals = []
     err_vals = []
     for run in plotdata:
+        ys = np.array([getattr(data, plot) for data in run.rundata])
+        zs = np.std(ys)
         if plot == 'runtime':
-            run_y = [np.array(getattr(data, plot)) / data.num_conditions for data in run.rundata]
-        else:
-            run_y = [getattr(data, plot) for data in run.rundata]
-        err_vals.append(np.std(run_y))
-        y_vals.append(np.mean(run_y))
+            ys = np.array([getattr(data, plot) / data.num_conditions for data in run.rundata])
+            zs /= data.num_conditions
+        err_vals.append(zs)
+        y_vals.append(np.mean(ys))
     return x_vals, y_vals, err_vals
 
 

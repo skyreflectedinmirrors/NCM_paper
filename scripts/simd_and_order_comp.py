@@ -41,6 +41,26 @@ handles = [mlines.Line2D([], [], color=SIMT_color, marker=SIMT_sym, linestyle=''
                           label='F-order', markerfacecolor='none', markeredgecolor='k')]
 legend = (handles, labels)
 
-pp.plotter(show=True,
+xval, yval, zval, label = pp.plotter('../SIMD_SIMT_Order_comparison.pdf', show=False,
     cores='1', vecwidth='8', rates='hybrid', kernel='split',
-    legend_handler=legend, marker_func=marker_func)
+    legend_handler=legend, marker_func=marker_func, return_vals=True,
+    norm=False, ylog=True)
+
+#print stats
+C_order = [i for i,l in enumerate(label) if 'C-order' in l]
+F_order = [i for i in range(len(label)) if i not in C_order]
+
+C_SIMT = next(i for i in C_order if 'SIMT' in label[i])
+C_SIMD = next(i for i in C_order if i != C_SIMT)
+F_SIMT = next(i for i in F_order if 'SIMT' in label[i])
+F_SIMD = next(i for i in F_order if i != F_SIMT)
+
+print 'SIMT vs SIMD'
+for i in range(len(yval[0])):
+    print i, 'C', yval[C_SIMT][i] / yval[C_SIMD][i]
+    print i, 'F', yval[F_SIMT][i] / yval[F_SIMD][i]
+
+print 'C vs F'
+for i in range(len(yval[0])):
+    print i, 'SIMT', yval[F_SIMT][i] / yval[C_SIMT][i]
+    print i, 'SIMD', yval[F_SIMD][i] / yval[C_SIMD][i]
