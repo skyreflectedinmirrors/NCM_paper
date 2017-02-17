@@ -147,9 +147,6 @@ although the code is equally capable of a evaluating the temperature rate using 
 
 \subsection{Code Generation}
 Code generation is handled by the python package \texttt{loo.py}~\cite{kloeckner_loopy_2014}, which provides an interface to OpenCL allowing for unit testing and changes of program structure, e.g. data ordering, vectorization, threading patterns etc.
-Additionally, \texttt{loo.py} allows for code generation for multiple languages, including (non-vectorized) C, CUDA, and Intel's ISPC compiler, which targets SIMD vectorization on the CPU and MIC.
-This is a direction that may be explored in the future to compare the speedups of the various compilers.
-
 
 \section{Results and Discussion}
 \subsection{Validation}
@@ -188,7 +185,7 @@ and the lower precision bound for the net rate of progress error norm is set to 
 \midrule
 \multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 4.66e6 & 2.37e1 & 2.12e5 \\
 \multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 2.67e04 & 2.84e0 & 2.64e4 \\
-\multicolumn{1}{l}{USC-Mech II\cite{Warm ng:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 7.92e00 & 3.22e03 \\
+\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 7.92e00 & 3.22e03 \\
 \multicolumn{1}{l}{\ce{IC5H11OH}\cite{Sarathy:2013jr}} & -1 &  -1 & -1 & -1 & -1 & -1 \\
 \bottomrule
 \end{tabular}
@@ -247,12 +244,16 @@ This suggests that evaluation of the chemical-source terms for a single thermo-c
 Additionally, OpenCL allows assigning of work to devices by shared resources e.g., a L3 cache, which was not pursued in this work for simplicity; this should be investigated in future work to determine the effect on scaling efficiency.
 
 \section{Conclusions}
-%
+In this work, a shallow SIMD-vectorized chemical source term evaluation OpenCL code generator was developed and validated against Cantera~\cite{Cantera} for a wide range of chemical kinetic models~\cite{Burke:2011fh,smith_gri-mech_30,Wang:2007,Sarathy:2013jr}.
+Significant speedups of up to \SI{2.42}{$\times$} over a baseline SIMT-vectorized code were observed.
+Two data-ordering schemes were investigated, showing a clear performance benefit for use of the ``C'' (row-major) ordering for the shallow vectorized code.
+Further, this study suggests that a deep SIMD-vectorized code---currently under development---may see even greater accelerations due to expected increases in cache-hit rates.
+Larger vector widths were found to provide accelerations for the smaller models studied, but performance was similar over all vector widths tested for the largest models tested.
+Finally, the strong parallel scaling efficiency was examined for the shallow vectorized code; the larger models exhibited higher scaling efficiency, possibly due to failure of the \ce{H2}\slash\ce{CO} model to saturate the CPU throughput.
+Future extensions of this work will include development of a SIMD\slash SIMT-accelerated sparse-analytical Jacobian code targeted at CPUs, GPUs and MICs.
 
 \section{Acknowledgements}
 This research was funded by \ldots
-
-\noindent\textbf{Page Limits:} The total length of the paper including references should be limited to 6 pages.
 
 \printbibliography[heading=bibintoc]
 
