@@ -18,7 +18,7 @@
 
 @article{CurtisGPU:2017,
 	Author = {Curtis, Nicholas J and Niemeyer, Kyle Evan and Sung, Chih-Jen},
-	title = {An investigation of {GPU}-based stiff chemical kinetics integration methods},
+	@title = {An investigation of {GPU}-based stiff chemical kinetics integration methods},
 	journal = {Combust. Flame},
 	doi = {10.1016/j.combustflame.2017.02.005},
 	year = {2017}
@@ -31,46 +31,48 @@
 	Journal = {Combust. Flame},
 	Number = {4},
 	Pages = {1375--1394},
-	Title = {A methodology for the integration of stiff chemical kinetics on {GPUs}},
+	@Title = {A methodology for the integration of stiff chemical kinetics on {GPUs}},
 	Volume = {162},
 	Year = {2015},
 	Bdsk-Url-1 = {http://dx.doi.org/10.1016/j.combustflame.2014.11.003}}
 
-@ARTICLE{stone2016,
-	author = {{Stone}, C.~P. and {Niemeyer}, K.~E.},
-	title = {Accelerating finite-rate chemical kinetics with coprocessors: comparing vectorization methods on GPUs, MICs, and CPUs},
-	journal = {ArXiv e-prints},
-	archivePrefix = {arXiv},
-	eprint = {1608.05794},
-	primaryClass = {physics.comp-ph},
-	keywords = {Physics - Computational Physics, Computer Science - Distributed, Parallel, and Cluster Computing, Physics - Chemical Physics, 80A32 (Primary) 80A30, 65L04, 65L06 (Secondary)},
-	year = {2016},
-	month = {Aug},
-	adsurl = {http://adsabs.harvard.edu/abs/2016arXiv160805794S},
-	adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+@misc{stone2016,
+   author = {{Stone}, C.~P. and {Niemeyer}, K.~E.},
+   @title = {Accelerating finite-rate chemical kinetics with coprocessors: comparing vectorization methods on {GPUs}, {MICs}, and {CPUs}},
+   Note = {Under review. {\tt \href{https://arxiv.org/abs/1608.05794}{arXiv:1608.05794} [physics.comp-ph]}},
+   year = {2016},
+   month = {Aug},
 }
-
 @article{stone2010opencl,
-	title={OpenCL: A parallel programming standard for heterogeneous computing systems},
-	author={Stone, John E and Gohara, David and Shi, Guochun},
-	journal={Comput. Sci. Eng.},
-	volume={12},
-	number={3},
-	pages={66--73},
-	year={2010},
-	publisher={IEEE}
+ author = {Stone, John E. and Gohara, David and Shi, Guochun},
+ @title = {OpenCL: A Parallel Programming Standard for Heterogeneous Computing Systems},
+ journal = {IEEE Des. Test},
+ issue_date = {May 2010},
+ volume = {12},
+ number = {3},
+ month = {may},
+ year = {2010},
+ issn = {0740-7475},
+ pages = {66--73},
+ numpages = {8},
+ @url = {http://dx.doi.org/10.1109/MCSE.2010.69},
+ doi = {10.1109/MCSE.2010.69},
+ acmid = {1803953},
+ publisher = {IEEE Comput. Society Press},
+ address = {Los Alamitos, CA, USA}
+}
+@article{kroshko2013efficient,
+journal = {J. Comput. Sci},
+@title = {Efficient {SIMD} solution of multiple systems of stiff {IVPs}},
+volume = {4},
+number = {5},
+pages = {377 - 385},
+year = {2013},
+doi = {http://dx.doi.org/10.1016/j.jocs.2012.08.017},
+@url = "http://www.sciencedirect.com/science/article/pii/S1877750312001068",
+author = {Andrew Kroshko and Raymond J. Spiteri}
 }
 
-@article{kroshko2013efficient,
-	title={Efficient SIMD solution of multiple systems of stiff IVPs},
-	author={Kroshko, Andrew and Spiteri, Raymond J},
-	journal={J. Comput. Sci.},
-	volume={4},
-	number={5},
-	pages={377--385},
-	year={2013},
-	publisher={Elsevier}
-}
 @article{Niemeyer:2016aa,
 	Author = {Niemeyer, Kyle E and Curtis, N J and Sung, C J},
 	Month = {Feb},
@@ -81,12 +83,12 @@
 	volume = {},
         number = {},
 	pages = {},
-	Title = {\texttt{pyJac}: analytical {Jacobian} generator for chemical kinetics},
+	@Title = {\texttt{pyJac}: analytical {Jacobian} generator for chemical kinetics},
 	Year = {2017}}
 
 @inproceedings{kloeckner_loopy_2014,
 	author = {{Kl{\"o}ckner}, Andreas},
-	title = {Loo.py: transformation-based code~generation for {GPU}s and {CPU}s},
+	@title = {Loo.py: transformation-based code~generation for {GPU}s and {CPU}s},
 	booktitle = {Proc. ARRAY `14: ACM SIGPLAN Workshop Libr., Lang., Compil. Array Progr.},
 	year = 2014,
 	publisher = {Assoc. Comput. Mach.},
@@ -96,7 +98,7 @@
 
 @misc{Cantera,
    author = {David G. Goodwin and Harry K. Moffat and Raymond L. Speth},
-   title = {Cantera: An Object-oriented Software Toolkit for Chemical
+   @title = {Cantera: An Object-oriented Software Toolkit for Chemical
             Kinetics, Thermodynamics, and Transport Processes},
    year = {2017},
    note = {Version 2.3.0},
@@ -123,7 +125,7 @@
 	Journal = {Int. J. Chem. Kinet.},
 	Number = {7},
 	Pages = {444--474},
-	Title = {Comprehensive {H}$_2$\slash {O}$_2$ kinetic model for high-pressure combustion},
+	@Title = {Comprehensive {H}$_2$\slash {O}$_2$ kinetic model for high-pressure combustion},
 	Volume = {44},
 	Year = {2011}}
 	
@@ -150,6 +152,6 @@
 	Journal = {Combust. Flame},
 	Number = {12},
 	Pages = {2712--2728},
-	Title = {A comprehensive experimental and modeling study of iso-pentanol combustion},
+	@Title = {A comprehensive experimental and modeling study of iso-pentanol combustion},
 	Volume = {160},
 	Year = {2013}}
