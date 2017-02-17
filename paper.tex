@@ -45,34 +45,28 @@
 
 \title{ Title of Paper }
 
-\author[1]{Author Name}
-\author[1]{Author Name}
-\author[2]{Author Name}
-\author[2,*]{Author Name}
+\author[1,*]{Nicholas Curtis}
+\author[1]{Chih-Jen Sung}
 
-\affil[1]{Department, Institution, Address, Country}
-\affil[2]{Department, Institution, Address, Country}
-\affil[*]{Corresponding author: \email{author@university.edu}}
+\affil[1]{Department of Mechanical Engineering, University of Connecticut, Storrs, CT 06269, USA}
+\affil[*]{Corresponding author: \email{nicholas.curtis@uconn.edu}}
 
 \begin{document}
 \maketitle
 
 %====================================================================
 \begin{abstract} % not to exceed 200 words
-Abstract should be between 150--200 words and should state briefly the purpose
-of the research, the principal results and major conclusions. An abstract is
-often presented separately from the article, so it must be able to stand alone.
-For this reason, References should be avoided, but if essential, then cite the
-author(s) and year(s). Also, non-standard or uncommon abbreviations should be
-avoided, but if essential they must be defined at their first mention in the
-abstract itself.
+A code generation platform for single-instruction, multiple-data vectorized OpenCL chemical source term evaluation was developed and validated against Cantera for a wide range of chemical kinetic models.
+Speedups of \SI{1.88}{2.42}{$\times$} were observed over a baseline single-instruction, multiple-thread parallelized code showing a clear performance benefit to use of a row-major data layout.
+Larger vector widths were found to produce speedups up to \SI{1.8}{$\times$} for smaller models, but had similar performance to smaller vector widths as the model size increased.
+Finally, the parallel scaling efficiency was found to be slightly better for larger models, and future extensions of this work were discussed.
 \end{abstract}
 
 % (Provide 2-4 keywords describing your research. Only abbreviations firmly
 % established in the field may be used. These keywords will be used for
 % sessioning/indexing purposes.)
 \begin{keyword}
-    Keyword1\sep Keyword2\sep Keyword3\sep Keyword4
+    Chemical Kinetics\sep Single Instruction, Multiple Data\sep Vector Processing
 \end{keyword}
 
 %====================================================================
@@ -86,13 +80,13 @@ The parallel programming standard OpenCL~\cite{stone2010opencl} has further enab
 
 \begin{figure}[htb]
   \centering
-  \begin{subfigure}[t]{0.54\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
       \includegraphics[width=\textwidth]{SIMD.pdf}
       \caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data.}
       \label{F:SIMD}
   \end{subfigure}
   \hfill
-  \begin{subfigure}[t]{0.43\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
       \includegraphics[width=\textwidth]{mem_access.pdf}
       \caption{Representation of an 2-D array with dimension $N_1 \times N_2$ in CPU memory, with linear index marked.}
       \label{F:mem}
@@ -238,14 +232,13 @@ Most likely this is due to the non-sequential memory access patterns of the shal
 Figure~\ref{F:Veccomp} investigates the effect of changing the vector-width supplied to a ``C''-ordered shallow-SIMD vectorization on a single CPU core.
 Significant speedups are seen with larger vector-widths for the smaller models, however as the model size increases data must be loaded from memory locations increasingly far apart and the performance of all three vector widths becomes similar.
 Finally in Fig.~\ref{F:SIMDscale} the strong parallel scaling of the chemical source term evaluation is examined for all four models for a ``C''-ordered shallow vectorization with vector-width of 16:
-The scaling efficiency for all models exhibits a power-law dependence, decreasing with the number of cores used.
-Interestingly the efficiency for the hydrogen model decreases fastest, while the larger models have similar efficiencies with isopentanol having the highest efficiency in all cases.
+The scaling efficiency for decreases with the number of cores used for all models; interestingly the efficiency for the hydrogen model decreases fastest, while the larger models have similar efficiencies with isopentanol having the highest efficiency in all cases.
 This suggests that evaluation of the chemical-source terms for a single thermo-chemical state for the smaller models may not saturate the processing power of the CPU, some efficiency may be lost due to context switching within OpenCL itself.
 Additionally, OpenCL allows assigning of work to devices by shared resources e.g., a L3 cache, which was not pursued in this work for simplicity; this should be investigated in future work to determine the effect on scaling efficiency.
 
 \section{Conclusions}
 In this work, a shallow SIMD-vectorized chemical source term evaluation OpenCL code generator was developed and validated against Cantera~\cite{Cantera} for a wide range of chemical kinetic models~\cite{Burke:2011fh,smith_gri-mech_30,Wang:2007,Sarathy:2013jr}.
-Significant speedups of up to \SI{2.42}{$\times$} over a baseline SIMT-vectorized code were observed.
+Significant speedups of up to \SIrange{1.88}{2.42}{$\times$} over a baseline SIMT-vectorized code were observed.
 Two data-ordering schemes were investigated, showing a clear performance benefit for use of the ``C'' (row-major) ordering for the shallow vectorized code.
 Further, this study suggests that a deep SIMD-vectorized code---currently under development---may see even greater accelerations due to expected increases in cache-hit rates.
 Larger vector widths were found to provide accelerations for the smaller models studied, but performance was similar over all vector widths tested for the largest models tested.
