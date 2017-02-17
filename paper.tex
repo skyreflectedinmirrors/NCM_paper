@@ -43,7 +43,7 @@
 \newcommand\papertopic{Reaction Kinetics}
 %======================================================================
 
-\title{ Title of Paper }
+\title{SIMD-vectorized Chemical Source Term Evaluation}
 
 \author[1,*]{Nicholas Curtis}
 \author[1]{Chih-Jen Sung}
@@ -75,7 +75,6 @@ Finally, the parallel scaling efficiency was found to be slightly better for lar
 %
 
 Single Instruction, Multiple-Data (SIMD) processing, also known as vector-processing, is an important parallel computing paradigm used increasingly in scientific computing.
-While central processing unit (CPU) clock speeds have increased rapidly over the past few decades---the phenomena known as Moore's Law---power consumption and heat dissipation issues have caused this trend to slow.
 Traditional multi-core parallelism is often used to increase CPU performance, however SIMD processors---and the related Single Instruction, Multiple Thread (SIMT) processors, e.g. graphics processing units (GPUs)---have gained recognition due to their increased floating operation throughput.
 The parallel programming standard OpenCL~\cite{stone2010opencl} has further enabled adoption of vector-processing based codes in scientific computing by providing a common application program interface (API) for execution on heterogeneous systems (e.g. CPU, GPU, etc.).
 
@@ -94,7 +93,7 @@ The parallel programming standard OpenCL~\cite{stone2010opencl} has further enab
   \end{subfigure}
 \end{figure}
 
-A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on a several different data concurrently (Fig.~\ref{F:SIMD}); the number of concurrent operations is known as the vector-width.
+A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on a several different data concurrently (Fig.~\ref{F:SIMD}); the number of concurrent operations is known as the vector-width\footnote{OpenCL allows for use of vector-widths not equal to the hardware vector-width via implicit conversion, and may provide some performance benefit as will be studied here}.
 Nearly all modern CPUs have vector processing units capable of running SIMD instructions, typically capable of handling 2--4 concurrent double precision operations.
 Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor (or MIC), have been developed that have tens of cores with very wide vector widths (e.g. 4--8 double precision operations); these very wide vector widths are also expected on forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures).
 
@@ -107,13 +106,13 @@ In the ``C'' (C row-major) format, the storage order is transposed with $[C_0]_0
 This ordering---along with the device (CPU, GPU, etc.) in question---have a large effect on the performance of SIMD\slash SIMT-vectorized algorithms.
 
 In a \textit{shallow}-SIMD vectorization, each SIMD-lane evaluates chemical source terms for a different thermo-chemical state.
-If the data is stored in ``F''-order, the SIMD-lanes accessing the concentration of species $k$ for states $j, j+1\ldots$ will load sequential locations in memory; the $k+1$th species concentration will be $N$ memory locations away however, increasing the likelihood of cache-misses on the CPU.
+If the data is stored in ``F''-order, the SIMD-lanes accessing the concentration of species $k$ for states $j, j+1\ldots$ will load sequential locations in memory, however the $k+1$th species concentration will be $N$ memory locations away increasing the likelihood of cache-misses on the CPU.
 In a \textit{deep}-SIMD vectorization, a vector-unit cooperates to evaluate chemical source terms for a single thermo-chemical state $j$, thus SIMD-lanes loading species concentrations $k, k+1\ldots$ will access sequential memory locations if the data is stored in ``C''-order.
 Further, in the ``C''-ordering the furthest difference between any two concentrations in a single thermo-chemical state is at most $N_s$, with $N_s \ll N$ in most cases; this greatly improved data-locality increases the chances of a cache-hit on the CPU.
 However, a deep vectorization may result in SIMD-\textit{waste}---similar to thread-divergence in GPU-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds).
 
 Finally, in a SIMT-vectorization, threads execute the same instruction over multiple data in lock-step without use of specialized vectorization instructions.
-This is the paradigm used in GPU-processing, a more through review of which can be found in our previous work~\cite{CurtisGPU}; one key-exception in this case is that the algorithm executed to evaluate the chemical source terms is identical for all thermo-chemical states, thus there is no thread-divergence for a shallow SIMT-vectorization. 
+This is the paradigm used in GPU-processing, a more through review of which can be found in our previous work~\cite{CurtisGPU:2017}; one key-exception in this case is that the algorithm executed to evaluate the chemical source terms is identical for all thermo-chemical states, thus there is no thread-divergence for a shallow SIMT-vectorization. 
 In Sec.~\ref{S:results} the effect of the data-ordering on the shallow-SIMD\slash SIMT vectorization performance will be studied.
 
 \subsection{Previous works and goals of this study}
@@ -137,7 +136,7 @@ The current code evaluates the following chemical source terms:
 where $\frac{\text{d}[C_k]}{\text{d}t}$, $N_R$, $\nu_{k,i}$, ${R_i}$, $c_i$ are the time rate of change of the concentration of species $k$, the number of reactions in the model, the net stoichiometric coefficient of species $k$ in reaction $i$, the net rate of progress of reaction $i$, and the pressure modification of reaction $i$ respectively.
 For further detail on each term, the reader is referred to our previous work~\cite{Niemeyer:2016aa}; the code is capable of evaluating all modern reaction rate types (e.g. pressure-log, chebyshev, etc.).
 
-In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: in this context, the ``constant-pressure assumption'' refers to evaluation within a reaction sub-step in the operator splitting scheme, rather than a general constant-pressure reactive-flow simulation.} is evaluated on a molar basis as:
+In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: in this context, the ``constant-pressure assumption'' refers to evaluation within a reaction sub-step in the operator splitting scheme, rather than a general constant-pressure reactive-flow simulation.} is evaluated as:
 \begin{equation}
 \frac{\text{d}[T]}{\text{d}t} = -\frac{\sum_{k}^{N_S} H^{\degree}_k \frac{\text{d}[C_k]}{\text{d}t}}{\sum_{k}^{N_S} [C_k] c_{p_k}^{\degree}}
 \end{equation}
@@ -196,7 +195,7 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 \end{table}
 
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
-Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP is \numrange{7}{8} orders of magnitude larger.
+Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{7}{8} orders of magnitude larger.
 We see here that the minimum estimated loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP, explaining this jump.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
 We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera---as this loss of precision only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
