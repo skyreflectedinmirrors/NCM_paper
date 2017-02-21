@@ -95,7 +95,7 @@ The parallel programming standard OpenCL~\cite{stone2010opencl} has further enab
 
 A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on a several different data concurrently (Fig.~\ref{F:SIMD}); the number of concurrent operations is known as the vector-width\footnote{OpenCL allows for use of vector-widths not equal to the hardware vector-width via implicit conversion, and may provide some performance benefit as will be studied here}.
 Nearly all modern CPUs have vector processing units capable of running SIMD instructions, typically capable of handling 2--4 concurrent double precision operations.
-Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor (or MIC), have been developed that have tens of cores with very wide vector widths (e.g. 4--8 double precision operations); these very wide vector widths are also expected on forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures).
+Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor (or MIC), have been developed that have tens of cores with very wide vector-widths (e.g. 4--8 double precision operations); these very wide vector-widths are also expected on forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures).
 
 \subsection{Data ordering and vectorization patterns}
 \label{S:data}
@@ -221,7 +221,7 @@ All code was compiled with \texttt{gcc 4.8.5} and ``\texttt{-O3}'' optimization,
   \end{subfigure} \\
   \begin{subfigure}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{SIMD_scaling}
-    \caption{Strong parallel scaling of a ``C''-ordered shallow-SIMD vectorization using a vector width of 16.}
+    \caption{Strong parallel scaling of a ``C''-ordered shallow-SIMD vectorization using a vector-width of 16.}
     \label{F:SIMDscale}
   \end{subfigure}
 \end{figure}
@@ -234,7 +234,7 @@ This is less than the theoretical maximum speedup on this CPU, which can process
 Most likely this is due to the non-sequential memory access patterns of the shallow vectorization discussed previously, but could also be caused in part by inefficiencies in translation of the OpenCL code to AVX code, a process handled by the Intel Opencl Runtime.
 
 The effect of changing the vector-width supplied to a ``C''-ordered shallow-SIMD vectorization on a single CPU core is investigated in Fig.~\ref{F:Veccomp}.
-Significant speedups are seen with larger vector-widths for the smaller models, however as the model size increases data must be loaded from increasingly distant memory locations and the performance of all three vector widths becomes similar.
+Significant speedups are seen with larger vector-widths for the smaller models, however as the model size increases data must be loaded from increasingly distant memory locations and the performance of all three vector-widths becomes similar.
 Finally in Fig.~\ref{F:SIMDscale} the strong parallel scaling of the chemical source term evaluation is examined for all four models with a ``C''-ordered shallow SIMD-vectorization and vector-width of 16:
 Interestingly the efficiency for the hydrogen model decreases fastest, while the larger models have similar efficiencies; the isopentanol model has the highest efficiency in all cases.
 This suggests that evaluation of the chemical-source terms for a single thermo-chemical state for the smaller models may not saturate the processing power of the CPU, some efficiency may be lost due to context switching within OpenCL itself.
@@ -245,7 +245,7 @@ In this work, a shallow SIMD-vectorized chemical source term evaluation OpenCL c
 Significant speedups of up to \SIrange{1.88}{2.42}{$\times$} over a baseline SIMT-vectorized code were observed.
 Two data-ordering schemes were investigated, showing a clear performance benefit for use of the ``C'' (row-major) ordering for the shallow vectorized code.
 Further, this study suggests that a deep SIMD-vectorized code---currently under development---may see even greater accelerations due to expected increases in cache-hit rates.
-Larger vector widths were found to provide accelerations for the smaller models studied, but performance was similar over all vector widths tested for the largest models tested.
+Larger vector-widths were found to provide accelerations for the smaller models studied, but performance was similar over all vector-widths tested for the largest models tested.
 Finally, the strong parallel scaling efficiency was examined for the shallow vectorized code; the larger models exhibited higher scaling efficiency, possibly due to failure of the \ce{H2}\slash\ce{CO} model to saturate the CPU throughput.
 Future extensions of this work will include development of a SIMD\slash SIMT-accelerated sparse-analytical Jacobian code targeted at CPUs, GPUs and MICs.
 
