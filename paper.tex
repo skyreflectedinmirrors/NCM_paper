@@ -56,7 +56,7 @@
 
 %====================================================================
 \begin{abstract} % not to exceed 200 words
-A code generation platform for single-instruction, multiple-data-vectorized (SIMD) chemical source term evaluation was developed and validated against Cantera for a wide range of chemical kinetic models.
+A code generation platform for single-instruction, multiple-data (SIMD) vectorized chemical source term evaluation was developed and validated against Cantera for a wide range of chemical kinetic models.
 Speedups of up to \SIrange{1.88}{2.42}{$\times$} were observed over a baseline single-instruction, multiple-thread (SIMT) parallelized code.
 Additionally, use of a row-major data layout was found to increase both the SIMD and SIMT performance by up to \SIrange{1.96}{2.38}{$\times$} over a column-major data layout.
 Larger vector widths were found to produce speedups up to \SI{1.8}{$\times$} for smaller models, but had similar performance to smaller vector widths as the model size increased.
