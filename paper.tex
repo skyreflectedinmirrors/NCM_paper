@@ -59,7 +59,7 @@
 A code generation platform for single-instruction, multiple-data (SIMD) vectorized chemical source term evaluation was developed and validated against Cantera for a wide range of chemical kinetic models.
 Speedups of up to \SIrange{1.88}{2.42}{$\times$} were observed over a baseline single-instruction, multiple-thread (SIMT) parallelized code.
 Additionally, use of a row-major data layout was found to increase both the SIMD and SIMT performance by up to \SIrange{1.96}{2.38}{$\times$} over a column-major data layout.
-Larger vector widths were found to produce speedups up to \SI{1.8}{$\times$} for smaller models, but had similar performance to smaller vector widths as the model size increased.
+Larger vector-widths were found to produce speedups up to \SI{1.8}{$\times$} as compared to a small vector-width for smaller models, e.g. GRI-Mech 3.0, but as the model size increased the performance of all vector-widths were similar.
 Finally, the parallel scaling efficiency was found to be slightly better for larger models, and future extensions of this work were discussed.
 \end{abstract}
 
