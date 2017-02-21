@@ -80,22 +80,22 @@ The parallel programming standard OpenCL~\cite{stone2010opencl} has further enab
 
 \begin{figure}[htb]
   \centering
-  \begin{subfigure}[t]{0.45\linewidth}
+  \begin{minipage}[t]{0.45\linewidth}
       \includegraphics[width=\textwidth]{SIMD.pdf}
       \caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with several lanes (L0, L1, etc.).  The vector unit executes a single instruction concurrently on multiple data.}
       \label{F:SIMD}
-  \end{subfigure}
+  \end{minipage}
   \hfill
-  \begin{subfigure}[t]{0.45\linewidth}
+  \begin{minipage}[t]{0.45\linewidth}
       \includegraphics[width=\textwidth]{mem_access.pdf}
       \caption{Representation of an 2-D array with dimension $N_1 \times N_2$ in CPU memory, with linear index marked.}
       \label{F:mem}
-  \end{subfigure}
+  \end{minipage}
 \end{figure}
 
-A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on a several different data concurrently (Fig.~\ref{F:SIMD}); the number of concurrent operations is known as the vector-width\footnote{OpenCL allows for use of vector-widths not equal to the hardware vector-width via implicit conversion, and may provide some performance benefit as will be studied here}.
+A SIMD instruction utilizes specialized vector processing hardware to execute the same floating point operation (e.g. multiplication, division, etc.) on a several different data concurrently (Fig.~\ref{F:SIMD}); the number of concurrent operations is known as the vector-width\footnote{OpenCL allows for use of vector-widths different from the actual hardware vector-width via implicit conversion, and may provide some performance benefit as will be studied in Sec.~\ref{S:results}}.
 Nearly all modern CPUs have vector processing units capable of running SIMD instructions, typically capable of handling 2--4 concurrent double precision operations.
-Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor (or MIC), have been developed that have tens of cores with very wide vector-widths (e.g. 4--8 double precision operations); these very wide vector-widths are also expected on forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures).
+Additionally, specialized hardware accelerators, e.g. Intel's Xeon Phi co-processor or multi integrated core architecture (MIC), have been developed that have tens of cores with very wide vector-widths (e.g. 4--8 double precision operations); these very wide vector-widths are also expected on forthcoming Intel CPUs (the Skylake Xeon and Cannon Lake architectures).
 
 \subsection{Data ordering and vectorization patterns}
 \label{S:data}
