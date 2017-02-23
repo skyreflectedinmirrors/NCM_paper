@@ -28,13 +28,9 @@ def marker_func(name):
 
 labels = ['SIMT', 'SIMD', 'C-order (Filled)', 'F-order (Hollow)']
 handles = [mlines.Line2D([], [], color=SIMT_color, marker=SIMT_sym, linestyle='',
-                          markersize=ps.marker_style['size'], label='SIMT',
-                          markerfacecoloralt='none',
-                          fillstyle='left'),
+                          markersize=ps.marker_style['size'], label='SIMT'),
            mlines.Line2D([], [], color=SIMD_color, marker=SIMD_sym, linestyle='',
-                          markersize=ps.marker_style['size'], label='SIMD',
-                          markerfacecoloralt='none',
-                          fillstyle='left'),
+                          markersize=ps.marker_style['size'], label='SIMD'),
            mlines.Line2D([], [], linestyle='', marker=None, label='C-order (Filled)'),
            mlines.Line2D([], [], linestyle='', marker=None, label='F-order (Hollow)')]
 legend = (handles, labels)
