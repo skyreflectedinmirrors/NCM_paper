@@ -50,7 +50,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
         if filters[f] is None:
             continue
         assert any(data[x] for x in data), 'No data matching all filters'
-        if f in data[data.keys()[0]][0]._asdict():
+        if f in data[list(data.keys())[0]][0]._asdict():
             for mech in data:
                 data[mech] = [x for x in data[mech] if __compare(x, f, filters[f])]
     #compute data
@@ -212,7 +212,7 @@ def plotter(plot_name='', show=True, plot_reacs=True, norm=True,
     if norm:
         ylabel = 'Speedup'
         if plot_cores:
-            ylabel = 'Strong Parallel Scaling'
+            ylabel = 'Parallel Scaling Efficiency'
     if plot_cores:
         xlabel = 'Number of Cores'
 

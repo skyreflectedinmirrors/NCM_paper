@@ -26,7 +26,7 @@ def marker_func(name):
         retval.append(SIMD_color)
     return tuple(retval)
 
-labels = ['SIMT', 'SIMD', 'C-order', 'F-order']
+labels = ['SIMT', 'SIMD', 'C-order (Filled)', 'F-order (Hollow)']
 handles = [mlines.Line2D([], [], color=SIMT_color, marker=SIMT_sym, linestyle='',
                           markersize=ps.marker_style['size'], label='SIMT',
                           markerfacecoloralt='none',
@@ -35,10 +35,8 @@ handles = [mlines.Line2D([], [], color=SIMT_color, marker=SIMT_sym, linestyle=''
                           markersize=ps.marker_style['size'], label='SIMD',
                           markerfacecoloralt='none',
                           fillstyle='left'),
-           mlines.Line2D([], [], linestyle='', marker=(4, 0, 45), markersize=ps.marker_style['size'],
-                          label='C-order', markerfacecolor='k', markeredgecolor='k'),
-           mlines.Line2D([], [], linestyle='', marker=(4, 0, 45), markersize=ps.marker_style['size'],
-                          label='F-order', markerfacecolor='none', markeredgecolor='k')]
+           mlines.Line2D([], [], linestyle='', marker=None, label='C-order (Filled)'),
+           mlines.Line2D([], [], linestyle='', marker=None, label='F-order (Hollow)')]
 legend = (handles, labels)
 
 xval, yval, zval, label = pp.plotter('../SIMD_SIMT_Order_comparison.pdf', show=False,
@@ -55,12 +53,12 @@ C_SIMD = next(i for i in C_order if i != C_SIMT)
 F_SIMT = next(i for i in F_order if 'SIMT' in label[i])
 F_SIMD = next(i for i in F_order if i != F_SIMT)
 
-print 'SIMT vs SIMD'
+print('SIMT vs SIMD')
 for i in range(len(yval[0])):
-    print i, 'C', yval[C_SIMT][i] / yval[C_SIMD][i]
-    print i, 'F', yval[F_SIMT][i] / yval[F_SIMD][i]
+    print(i, 'C', yval[C_SIMT][i] / yval[C_SIMD][i])
+    print(i, 'F', yval[F_SIMT][i] / yval[F_SIMD][i])
 
-print 'C vs F'
+print('C vs F')
 for i in range(len(yval[0])):
-    print i, 'SIMT', yval[F_SIMT][i] / yval[C_SIMT][i]
-    print i, 'SIMD', yval[F_SIMD][i] / yval[C_SIMD][i]
+    print(i, 'SIMT', yval[F_SIMT][i] / yval[C_SIMT][i])
+    print(i, 'SIMD', yval[F_SIMD][i] / yval[C_SIMD][i])

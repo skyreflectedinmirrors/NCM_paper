@@ -29,7 +29,7 @@ def process_data(plotdata, plot, reacs_as_x=True,
         zs = np.std(ys)
         if plot == 'runtime':
             ys = np.array([getattr(data, plot) / data.num_conditions for data in run.rundata])
-            zs /= data.num_conditions
+            zs /= run.rundata[0].num_conditions
         err_vals.append(zs)
         y_vals.append(np.mean(ys))
     return x_vals, y_vals, err_vals
