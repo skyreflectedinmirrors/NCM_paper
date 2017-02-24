@@ -17,7 +17,7 @@ for mech in mechs:
             name = line[:line.index(':')].strip()
             err_arr = np.array([float(x) for x in line[line.index(':') + 1:].split(',') if x.strip()])
             if ('rop_fwd' in name or 'rop_rev' in name) and 'linf' in name and np.any(err_arr > 1):
-                print file, np.where(err_arr > 1)
+                print(file, np.where(err_arr > 1))
             if name in err_dicts[mech_name]:
                 try:
                     assert np.allclose(err_dicts[mech_name][name], err_arr)
