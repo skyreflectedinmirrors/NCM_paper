@@ -185,18 +185,17 @@ For the reaction $i$ and state $j$ that results in the maximum ROP error $E_{R}$
 \multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 4.66e6 & 2.37e1 & 2.12e5 \\
 \multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 2.67e04 & 2.84e0 & 2.64e4 \\
 \multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 7.92e00 & 3.22e03 \\
-\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 1.07e-07 &  1.32e-07 & 3.24e-03 & 5.45e-16 & 5.70e-03 & 6.98e+00 \\
+\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.30e-1 & 2.26e00 & 6.10e+01 \\
 \bottomrule
 \end{tabular}
 \caption{Summary of rate of progress, species and temperature rate correctness.
 Error statistics are based on the infinity-norm of the relative error detailed in Eq.~\eqref{e:rel_err} for each quantity.
-\todo[inline]{i-pentanol validation still running}
 }
 \label{T:error}
 \end{table}
 
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera~\cite{Cantera} on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
-Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{7}{8} orders of magnitude larger.
+Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{8} orders of magnitude larger.
 We see here that the estimated lower bound on loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP, explaining the large increase in the net ROP error norm as compared to either the forward or backward ROP error norms.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
 We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of precision only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.

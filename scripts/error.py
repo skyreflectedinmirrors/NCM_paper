@@ -44,7 +44,7 @@ for mech in err_dicts:
             maxv = np.linalg.norm(err_vals, ord=np.inf)
             maxind = np.where(err_dicts[mech][name] == maxv)[0][0]
             print(name, format(maxv))
-            print('precision_max', format(err_dicts[mech]['rop_net_precmax'][maxind]))
-            print('precision_min', format(err_dicts[mech]['rop_net_precmin'][maxind]))
+            print('precision_max', format(err_dicts[mech]['rop_net_precmax - linf'][maxind]))
+            print('precision_min', format(err_dicts[mech]['rop_net_precmin - linf'][maxind]))
         elif 'prec' not in name:
             print(name, format(np.linalg.norm(err_vals, ord=np.inf)))
