@@ -82,7 +82,7 @@ The parallel programming standard OpenCL~\cite{stone2010opencl} has further enab
   \centering
   \begin{minipage}[t]{0.45\linewidth}
       \includegraphics[width=\textwidth]{SIMD.pdf}
-      \caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with $N$ lanes ($\text{L}_0,\ldots \text{L}_N$).  The vector unit executes a single instruction concurrently on multiple data.}
+      \caption{Schematic of SIMD processing.  A single processing element (e.g. a CPU core) contains a vector unit with $N_v$ lanes ($\text{L}_0,\ldots \text{L}_{N_v}$).  The vector unit executes a single instruction concurrently on multiple data.}
       \label{F:SIMD}
   \end{minipage}
   \hfill
@@ -106,8 +106,8 @@ In the ``C'' (C row-major) format, the storage order is transposed with $[C_1]_1
 This ordering---along with the device (CPU, GPU, etc.) in question---have a large effect on the performance of SIMD\slash SIMT-vectorized algorithms.
 
 In a \textit{shallow}-SIMD vectorization, each SIMD-lane evaluates chemical source terms for a different thermo-chemical state.
-If the data is stored in ``F''-order, the SIMD-lanes accessing the concentration of species $k$ for states $1, 2\ldots$ will load sequential locations in memory, however the $(k+1)$th species concentration will be $N_{\text{state}}$ memory locations away increasing the likelihood of cache-misses on the CPU.
-In a \textit{deep}-SIMD vectorization, a vector-unit cooperates to evaluate chemical source terms for a single thermo-chemical state $j$, thus SIMD-lanes loading species concentrations $k, k+1\ldots$ for e.g., state 1, will access sequential memory locations if the data is stored in ``C''-order.
+If the data is stored in ``F''-order, the SIMD-lanes accessing the concentration of species $k$ for e.g., states $1, 2,\ldots N_{v}$---the number of vector lanes---will load sequential locations in memory, however the $(k+1)$th species concentration will be $N_{\text{state}}$ memory locations away increasing the likelihood of cache-misses on the CPU.
+In a \textit{deep}-SIMD vectorization, a vector-unit cooperates to evaluate chemical source terms for a single thermo-chemical state, thus SIMD-lanes loading species concentrations $k, k+1\ldots k + N_v$ for e.g., state 1, will access sequential memory locations if the data is stored in ``C''-order.
 Further, in the ``C''-ordering the furthest difference between any two concentrations in a single thermo-chemical state is at most $N_{\text{sp}}$, with $N_{\text{sp}} \ll N_{\text{state}}$ in most cases; this greatly improved data-locality increases the chances of a cache-hit on the CPU.
 However, a deep vectorization may result in SIMD-\textit{waste}---similar to thread-divergence in GPU-processing---caused by different SIMD-lanes executing different instructions (e.g. from differing for-loop bounds).
 
