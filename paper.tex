@@ -57,8 +57,8 @@
 %====================================================================
 \begin{abstract} % not to exceed 200 words
 A code generation platform for single-instruction, multiple-data (SIMD) vectorized chemical source term evaluation was developed and validated against Cantera for a wide range of chemical kinetic models.
-Speedups of up to \SIrange{1.88}{2.42}{$\times$} were observed over a baseline single-instruction, multiple-thread (SIMT) parallelized code.
-Additionally, use of a row-major data layout was found to increase both the SIMD and SIMT performance by up to \SIrange{1.96}{2.38}{$\times$} over a column-major data layout.
+Speedups of up to \SIrange{1.90}{2.45}{$\times$} were observed over a baseline single-instruction, multiple-thread (SIMT) parallelized code.
+Additionally, use of a row-major data layout was found to increase both the SIMD and SIMT performance by up to \SIrange{2.00}{2.38}{$\times$} over a column-major data layout.
 Larger vector-widths were found to produce speedups up to \SI{1.8}{$\times$} as compared to a small vector-width for smaller models, e.g. GRI-Mech 3.0, but as the model size increased the performance of all vector-widths were similar.
 Finally, the parallel scaling efficiency was found to be slightly better for larger models, and future extensions of this work were discussed.
 \end{abstract}
@@ -228,9 +228,9 @@ All code was compiled with \texttt{gcc 4.8.5} and ``\texttt{-O3}'' optimization,
 \end{figure}
 
 In Fig.~\ref{F:SIMDComp}, the performance of the shallow-SIMD and SIMT vectorization are compared on a single CPU core for both ``C'' and ``F'' memory formats.
-The ``C''-ordered SIMD\slash SIMT vectorizations show a speedup over the equivalent ``F''-ordered code by \SIrange{1.36}{1.96}{$\times$} and \SIrange{1.60}{2.38}{$\times$} respectively.
+The ``C''-ordered SIMD\slash SIMT vectorizations show a speedup over the equivalent ``F''-ordered code by \SIrange{1.46}{2.00}{$\times$} and \SIrange{1.61}{2.38}{$\times$} respectively.
 This demonstrates that enhanced data-locality of the ``C''-ordering for CPU caching---discussed in Sec.~\ref{S:data}---is key to high performance on the CPU, and suggests that a deep vectorization would see even greater accelerations.
-The shallow vectorization is consistently faster than the SIMT vectorization, by \SIrange{1.72}{1.88}{$\times$} and \SIrange{2.10}{2.42}{$\times$} for the ``C'' and ``F'' memory formats respectively.
+The shallow vectorization is consistently faster than the SIMT vectorization, by \SIrange{1.73}{1.90}{$\times$} and \SIrange{2.00}{2.45}{$\times$} for the ``C'' and ``F'' memory formats respectively.
 This is less than the theoretical maximum speedup on this CPU, which can process \SI{256}{\bit} AVX instructions (i.e. four double-precision operations) concurrently.
 Most likely this is due to the non-sequential memory access patterns of the shallow vectorization discussed previously, but could also be caused in part by inefficiencies in translation of the OpenCL code to AVX code, a process handled by the Intel Opencl Runtime.
 
@@ -250,7 +250,7 @@ Additionally, OpenCL allows assigning of work to devices by shared memory resour
 
 \section{Conclusions}
 In this work, automatically generated OpenCL codes for shallow SIMD-vectorized chemical source term evaluation were developed and validated against Cantera~\cite{Cantera} for a wide range of chemical kinetic models~\cite{Burke:2011fh,smith_gri-mech_30,Wang:2007,Sarathy:2013jr}.
-Significant speedups of up to \SIrange{1.88}{2.42}{$\times$} over a baseline SIMT-vectorized code were observed.
+Significant speedups of up to \SIrange{1.90}{2.45}{$\times$} over a baseline SIMT-vectorized code were observed.
 Two data-ordering schemes were investigated, showing a clear performance benefit for use of the ``C'' (row-major) ordering for the shallow vectorized code.
 Further, this study suggests that a deep SIMD-vectorized code---currently under development---may see even greater accelerations due to expected increases in cache-hit rates.
 Larger vector-widths were found to provide accelerations for the smaller models studied, but the speedup was similar over all vector-widths tested for the largest models investigated.
