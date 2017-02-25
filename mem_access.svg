@@ -178,14 +178,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans;-inkscape-font-specification:sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-       x="30.282949"
+       x="24.741566"
        y="107.90356"
        id="text3961"><tspan
          sodipodi:role="line"
          id="tspan3963"
-         x="30.282949"
+         x="24.741566"
          y="107.90356"
-         style="font-size:8.75px;line-height:1.25">N</tspan></text>
+         style="font-size:8.75px;line-height:1.25">1xN</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans;-inkscape-font-specification:sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
@@ -200,22 +200,22 @@
          style="font-size:10px;line-height:1.25">...</tspan></text>
     <text
        xml:space="preserve"
-       x="19.155325"
+       x="33.305714"
        y="151.86029"
        id="text3961-5"
        style="line-height:0%;text-align:start;text-anchor:start"><tspan
          sodipodi:role="line"
-         x="19.155325"
+         x="33.305714"
          y="151.86029"
-         style="font-size:8.75px;line-height:1.25;text-align:start;text-anchor:start"
+         style="font-size:8.75px;line-height:1.25;text-align:center;text-anchor:middle"
          id="tspan61">(K-1)x</tspan><tspan
          sodipodi:role="line"
-         x="19.155325"
+         x="33.305714"
          y="162.79779"
-         style="font-size:8.75px;line-height:1.25;text-align:start;text-anchor:start"
-         id="tspan65">(N-1)</tspan><tspan
+         style="font-size:8.75px;line-height:1.25;text-align:center;text-anchor:middle"
+         id="tspan65">N</tspan><tspan
          sodipodi:role="line"
-         x="19.155325"
+         x="33.305714"
          y="169.20036"
          style="font-size:8.75px;line-height:1.25;text-align:start;text-anchor:start"
          id="tspan3739" /></text>
