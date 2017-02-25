@@ -133,7 +133,7 @@ The current code evaluates the following chemical source terms:
 \begin{equation}
 \dot{\omega}_k = \sum_{i=1}^{N_{\text{reac}}} \nu_{ki} R_i c_i
 \end{equation}
-where $\dot{\omega}_k$, $N_{\text{reac}}$, $\nu_{k,i}$, ${R_i}$, $c_i$ are the time rate of change of the concentration of species $k$, the number of reactions in the model, the net stoichiometric coefficient of species $k$ in reaction $i$, the net rate of progress of reaction $i$, and the pressure modification of reaction $i$, respectively.
+where $\dot{\omega}_k$, $N_{\text{reac}}$, $\nu_{ki}$, ${R_i}$, $c_i$ are the time rate of change of the concentration of species $k$, the number of reactions in the model, the net stoichiometric coefficient of species $k$ in reaction $i$, the net rate of progress of reaction $i$, and the pressure modification of reaction $i$, respectively.
 For further detail on each term, the reader is referred to our previous work~\cite{Niemeyer:2016aa}; the code is capable of evaluating all modern reaction rate types (e.g. pressure-log, Chebyshev, etc.).
 
 In addition, the temperature rate of change using the constant-pressure assumption\footnote{Note: in this context, the ``constant-pressure assumption'' refers to evaluation within a reaction sub-step in the operator splitting scheme, rather than a general constant-pressure reactive-flow simulation.} is evaluated as:
@@ -173,7 +173,7 @@ For a more direct comparison, a relative error norm of a quantity $X_{ij}$ over 
  E_{X} = \left\lVert \frac{\left\lvert X_{ij,\text{CT}} - X_{ij}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{ij,\text{CT}} \right\rvert} \right\rVert_{i,j,\infty}
 \label{e:rel_err}
 \end{equation}
-For the reaction $i$ and state $j$ that results in the maximum ROP error $E_{R}$, the lower precision bound is set to $\text{P}_{\text{lower}}^{*} = \text{P}_{i,\text{lower}}$.
+For the reaction $i$ and state $j$ that results in the maximum ROP error $E_{R}$, the lower precision bound is set to $\text{P}_{\text{lower}}^{*} = \text{P}_{ij,\text{lower}}$.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
@@ -196,7 +196,7 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera~\cite{Cantera} on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
 Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{8} orders of magnitude larger.
-We see here that the estimated lower bound on loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP, explaining the large increase in the net ROP error norm as compared to either the forward or backward ROP error norms.
+We see here that the estimated lower bound on loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP for all but the \ce{iC5H11OH} model, explaining the large increase in the net ROP error norm as compared to either the forward or backward ROP error norms.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
 We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of precision only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
 \todo{update for new valid}
@@ -236,12 +236,15 @@ Most likely this is due to the non-sequential memory access patterns of the shal
 
 The effect of changing the vector-width supplied to a ``C''-ordered shallow-SIMD vectorization on a single CPU core is investigated in Fig.~\ref{F:Veccomp}.
 Significant speedups are seen with larger vector-widths for the smaller models, however as the model size increases data must be loaded from increasingly distant memory locations and the performance of all three vector-widths becomes similar.
-Finally, the strong parallel scaling efficiency:
+
+Finally, the strong parallel scaling efficiency is defined as:
 \begin{equation}
 S = \frac{t_1}{N t_N}
 \end{equation}
-where $t_1$ is the mean wall-clock runtime of the chemical source terms evaluation on one core and $t_N$ the mean runtime on $N$ cores, is examined in Fig~.\ref{F:SIMDscale} for all four models with a ``C''-ordered shallow SIMD-vectorization and vector-width of 16.
-Interestingly the efficiency for the hydrogen model decreases fastest, while the larger models have nearly identical for more than two cores; the isopentanol model has the highest efficiency in all cases.
+where $t_1$ is the mean wall-clock runtime of chemical source terms evaluation on one core and $t_N$ the mean runtime on $N$ cores.
+Fig.~\ref{F:SIMDscale} examines the strong parallel scaling efficiency for all four models with a ``C''-ordered shallow SIMD-vectorization and vector-width of 16.
+Interestingly the efficiency of the hydrogen model decreases the fastest while the larger models have significantly larger scaling efficiencies for more than 4 cores.
+Additionally, it appears that for a fixed number of cores, the scaling efficiency increases with model size.
 This suggests that evaluation of the chemical-source terms for a single thermo-chemical state for the smaller models may not saturate the processing power of the CPU, some efficiency may be lost due to context switching within OpenCL itself.
 Additionally, OpenCL allows assigning of work to devices by shared memory resources, e.g., a L3 cache, which was not pursued in this study for simplicity; this should be investigated in future work to determine the effect on scaling efficiency.
 
