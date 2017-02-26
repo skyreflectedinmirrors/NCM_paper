@@ -162,12 +162,12 @@ To quantify this phenomena, the error in forward ROP is first defined as:
 \begin{equation}
 \varepsilon^{\prime}_{ij} = \left\lvert R_{ij}^{\prime} - R_{ij,\text{CT}}^{\prime} \right\rvert
 \end{equation}
-and the error in reverse ROP $\varepsilon^{\prime\prime}_{ij}$ can be defined analogously.
+while the error in reverse ROP $\varepsilon^{\prime\prime}_{ij}$ can be defined analogously.
 Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest error in net ROP, i.e. $E_{R}$, an estimate of the percent error attributable to floating point error accumulation from the forward and reverse ROPs can be obtained as:
 \begin{equation}
 E_{\varepsilon} = 100\times\frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{R_{i^{*}j^{*},\text{CT}}} \si{\percent}
 \end{equation}
-If this estimate is near \SI{100}{\percent}, it indicates that the maximum error in forward or reverse ROPs are of a similar magnitude to the net ROP, hence the error in net ROP is expected be large in this case.
+If this estimate is near \SI{100}{\percent}, it indicates that the error in forward or reverse ROPs at this state is of a similar magnitude to the net ROP, hence the error in net ROP is expected to be large.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
@@ -191,7 +191,7 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera~\cite{Cantera} on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
 Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{9} orders of magnitude larger.
 We see here that $E_{\varepsilon}$ is over \SI{100}{\percent} for all models, indicating that this large increase in error is caused by the accumulation of floating point error from the forward and reverse ROPs, as previously discussed.
-The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
+The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as the error in species rates is amplified by multiplication with thermodynamic properties.
 We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of accuracy only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
 
 \subsection{Performance}
