@@ -148,44 +148,38 @@ Code generation is enabled by the python package \texttt{loo.py}~\cite{kloeckner
 
 \section{Results and Discussion}
 \subsection{Comparison to Cantera}
-The reaction rates of progress (ROP), species and temperature rates in this study are validated by comparison with Cantera~\cite{Cantera}, however special care must be taken due floating point arithmetic issues
+The reaction rates of progress (ROP), species and temperature rates in this study are validated by comparison with Cantera~\cite{Cantera}, however special care must be taken due floating point arithmetic issues.
 
-In computing the net ROP of reaction $i$ for state $j$ from the forward and reverse ROP: $R_{ij} = R_{ij}^{\prime} - R_{ij}^{\prime\prime}$, precision can easily be lost as the net ROP may be---particularly near chemical equilibrium---many orders of magnitude smaller than the forward or reverse rates.
-A base-ten bound on loss of precision~\cite{goldberg1991every} can be found as:
+For a direct comparison, a relative error norm of a quantity $X_{ij}$ over all states $j$, and reactions (or species) $i$ was computed using the $L^{\infty}$ norm:
 \begin{equation}
-\text{L}_{ij,\text{lower}} = 2^{-p_{ij}} \le \left\lvert 1 - \frac{R_{ij}^{\prime}}{R_{ij}^{\prime\prime}} \right\rvert \le 2^{-q_{ij}} = \text{L}_{ij,\text{upper}}
-\label{e:bounds}
-\end{equation}
-with $q_{ij} \le p_{ij}$.
-To obtain an estimate of the precision bounds, the forward and reverse ROP from Cantera~\cite{Cantera} are substituted into Eq.~\eqref{e:bounds}.
-Additionally a higher-precision number format (in this case, a quad-precision floating point) is used in this computation to maintain accuracy.
-Finally, when determining the error in the net ROP between this code and Cantera~\cite{Cantera}, the bounds on the percent error attributable to precision loss, $\text{P}_{ij,\text{err}}$ can be estimated as:
-\begin{equation}
-\text{P}_{ij,\text{lower}} = 100 * \frac{\text{L}_{ij,\text{lower}}}{\left\lvert\ R_{ij,\text{CT}} - R_{ij}\right\rvert} \le
-\text{P}_{ij,\text{err}} \le 100 * \frac{\text{L}_{ij,\text{upper}}}{\left\lvert R_{ij,\text{CT}} - R_{ij} \right\rvert} = \text{P}_{ij,\text{upper}}
-\label{e:rel_bound}
-\end{equation}
-where the \text{CT} subscript indicates values from Cantera~\cite{Cantera}.
-In the case that $R_{ij,\text{CT}} = R_{ij}$, the error of this net ROP is zero and the precision loss is ignored.
-
-For a more direct comparison, a relative error norm of a quantity $X_{ij}$ over all states $j$, and reactions $i$ was computed using the $L^{\infty}$ norm:
-\begin{equation}
- E_{X} = \left\lVert \frac{\left\lvert X_{ij,\text{CT}} - X_{ij}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{ij,\text{CT}} \right\rvert} \right\rVert_{i,j,\infty}
+E_{X} = \left\lVert \frac{\left\lvert X_{ij,\text{CT}} - X_{ij}\right\rvert}{\num{e-10} + \num{e-6} * \left\lvert X_{ij,\text{CT}} \right\rvert} \right\rVert_{i,j,\infty}
 \label{e:rel_err}
 \end{equation}
-For the reaction $i$ and state $j$ that results in the maximum ROP error $E_{R}$, the lower precision bound is set to $\text{P}_{\text{lower}}^{*} = \text{P}_{ij,\text{lower}}$.
+where the \text{CT} subscript indicates values from Cantera~\cite{Cantera}
+
+However, in computing the net ROP of reaction $i$ for state $j$ from the forward and reverse ROP: $R_{ij} = R_{ij}^{\prime} - R_{ij}^{\prime\prime}$, accuracy can easily be lost as the net ROP may be---particularly near chemical equilibrium---many orders of magnitude smaller than the forward or reverse rates.
+To quantify this phenomena, the error in forward ROP is first defined as:
+\begin{equation}
+\varepsilon^{\prime}_{ij} = \left\lvert R_{ij}^{\prime} - R_{ij,\text{CT}}^{\prime} \right\rvert
+\end{equation}
+and the error in reverse ROP $\varepsilon^{\prime\prime}_{ij}$ can be defined analogously.
+Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest error in net ROP, i.e. $E_{R}$, an estimate of the percent error attributable to floating point error accumulation from the forward and reverse ROPs can be obtained as:
+\begin{equation}
+E_{\varepsilon} = 100\times\frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{R_{i^{*}j^{*},\text{CT}}} \si{\percent}
+\end{equation}
+If this estimate is near \SI{100}{\percent}, it indicates that the maximum error in forward or reverse ROPs are of a similar magnitude to the net ROP, hence the error in net ROP would be expected to be large in this case.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
 \centering
 \begin{tabular}{@{}S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] @{}}
 \toprule
-\multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$\text{P}_{\text{lower}}^{*}\si{\percent}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
+\multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$E_{\varepsilon}\si{\percent}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
 \midrule
-\multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 4.66e6 & 2.37e1 & 2.12e5 \\
-\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 2.67e04 & 2.84e0 & 2.64e4 \\
-\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 7.92e00 & 3.22e03 \\
-\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.30e-1 & 2.26e00 & 6.10e+01 \\
+\multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.08e2 & 2.37e1 & 2.12e5 \\
+\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.42e2 & 2.84e0 & 2.64e4 \\
+\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 1.44e2 & 3.22e03 \\
+\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 1.59e2 & 2.26e00 & 6.10e+01 \\
 \bottomrule
 \end{tabular}
 \caption{Summary of rate of progress, species and temperature rate correctness.
@@ -195,11 +189,10 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 \end{table}
 
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera~\cite{Cantera} on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
-Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{8} orders of magnitude larger.
-We see here that the estimated lower bound on loss of precision is \SIrange{4}{40}{$\times$} the error in net ROP for all but the \ce{iC5H11OH} model, explaining the large increase in the net ROP error norm as compared to either the forward or backward ROP error norms.
+Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{9} orders of magnitude larger.
+We see here that $E_{\varepsilon}$ is over \SI{100}{\percent} for all models, indicating that this large increase in error is caused by the accumulation of floating point error from the forward and reverse ROPs, as previously discussed.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as it depends directly on the species rates.
-We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of precision only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
-\todo{update for new valid}
+We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of accuracy only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
 
 \subsection{Performance}
 \label{S:results}
