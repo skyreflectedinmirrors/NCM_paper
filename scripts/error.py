@@ -4,34 +4,47 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 error_path = os.path.join(script_dir, 'error_checking')
 mechs = [os.path.join(error_path, x) for x in os.listdir(error_path) if os.path.isdir(os.path.join(error_path, x))]
 
+rtol = 1e-6
+atol = 1e-10
+
 err_dicts = {}
 for mech in mechs:
     mech_name = os.path.basename(os.path.normpath(mech))
     #get file list
-    files = [os.path.join(mech,x) for x in os.listdir(mech) if os.path.isfile(os.path.join(mech,x))]
+    files = [os.path.join(mech,x) for x in os.listdir(mech) if os.path.isfile(os.path.join(mech,x)) if x.endswith('.npz')]
     err_dicts[mech_name] = {}
     for file in files:
-        with open(file, 'r') as f:
-            lines = [x for x in f.read().split('\n') if x.strip()]
-        for line in lines:
-            name = line[:line.index(':')].strip()
-            err_arr = np.array([float(x) for x in line[line.index(':') + 1:].split(',') if x.strip()])
-            if ('rop_fwd' in name or 'rop_rev' in name) and 'linf' in name and np.any(err_arr > 1):
-                print(file, np.where(err_arr > 1))
+        arrs = np.load(file)
+        for name in arrs:
+            if 'value' in name or 'component' in name:
+                continue
+            errs = arrs[name]
+            values = arrs[name + '_value']
+            errs = errs / (atol + rtol * np.abs(values))
+
+            precs = None
+            if 'rop_net' in name:
+                #calculate the precision norms
+                precs = 100 * arrs['rop_component'] / arrs[name]
+
             if name in err_dicts[mech_name]:
-                try:
-                    assert np.allclose(err_dicts[mech_name][name], err_arr)
-                    err_dicts[mech_name][name] = err_arr
-                except AssertionError:
-                    err_dicts[mech_name][name] = np.maximum(err_dicts[mech_name][name], err_arr)
+                err_dicts[mech_name][name] = np.maximum(err_dicts[mech_name][name], errs)
+                if 'rop_net' in name:
+                    update_locs = np.where(err_dicts[mech_name][name] == errs)
+                    #update the precision norms at these locations
+                    err_dicts[mech_name]['rop_component'][update_locs] = precs[update_locs]
             else:
-                err_dicts[mech_name][name] = err_arr
+                err_dicts[mech_name][name] = errs
+                if precs is not None:
+                    err_dicts[mech_name]['rop_component'] = precs
 
 def format(val):
     return '{:1.2e}'.format(val)
+
+keyarr = ['fwd', 'rev', 'net', 'comp', 'wdot']
 for mech in err_dicts:
     print(mech)
-    for name in err_dicts[mech]:
+    for name in sorted(err_dicts[mech], key=lambda x:keyarr.index(next(y for y in keyarr if y in x))):
         if 'l2' in name:
             continue
         err_vals = err_dicts[mech][name][np.where(np.logical_not(
@@ -44,7 +57,5 @@ for mech in err_dicts:
             maxv = np.linalg.norm(err_vals, ord=np.inf)
             maxind = np.where(err_dicts[mech][name] == maxv)[0][0]
             print(name, format(maxv))
-            print('precision_max', format(err_dicts[mech]['rop_net_precmax - linf'][maxind]))
-            print('precision_min', format(err_dicts[mech]['rop_net_precmin - linf'][maxind]))
         elif 'prec' not in name:
             print(name, format(np.linalg.norm(err_vals, ord=np.inf)))
