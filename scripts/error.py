@@ -42,7 +42,8 @@ def format(val):
     return '{:1.2e}'.format(val)
 
 keyarr = ['fwd', 'rev', 'net', 'comp', 'wdot']
-for mech in err_dicts:
+mech_arr = ['H2', 'CH4', 'C2H4', 'IC5H11OH']
+for mech in sorted(err_dicts, key=lambda x:mech_arr.index(next(y for y in mech_arr if y in x))):
     print(mech)
     for name in sorted(err_dicts[mech], key=lambda x:keyarr.index(next(y for y in keyarr if y in x))):
         if 'l2' in name:

@@ -163,11 +163,11 @@ To quantify this phenomena, the error in forward ROP is first defined as:
 \varepsilon^{\prime}_{ij} = \left\lvert R_{ij}^{\prime} - R_{ij,\text{CT}}^{\prime} \right\rvert
 \end{equation}
 while the error in reverse ROP, $\varepsilon^{\prime\prime}_{ij}$, can be defined analogously.
-Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest error in net ROP, i.e. $E_{R}$, an estimate of the percent error attributable to floating point error accumulation from the forward and reverse ROPs can be obtained as:
+Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest error in net ROP, i.e. $E_{R}$, an estimate of the error attributable to floating point error accumulation from the forward and reverse ROPs can be obtained as:
 \begin{equation}
 E_{\varepsilon} = \frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{\num{e-10} + \num{e-6} * \left\lvert R_{i^{*}j^{*},\text{CT}} \right\rvert}
 \end{equation}
-This estimate allows for direct comparison of the error in forward or reverse ROPs to the magnitude of the net ROP itself, if they are of similar magnitude the error in net ROP will be large.
+This estimate allows for direct comparison of the error in forward or reverse ROPs to the value of the net ROP itself, if they are of similar magnitude the error in net ROP will be large.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
@@ -177,7 +177,7 @@ This estimate allows for direct comparison of the error in forward or reverse RO
 \multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$E_{\varepsilon}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
 \midrule
 \multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.32e1 & 2.37e1 & 2.12e5 \\
-\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.29e0 & 2.84e0 & 2.64e4 \\
+\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.11e-8 & 5.90e-8 & 1.21e0 & 1.29e0 & 2.84e0 & 2.64e4 \\
 \multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 2.27e0 & 1.44e2 & 3.22e03 \\
 \multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.87e-1 & 2.26e00 & 6.10e+01 \\
 \bottomrule
@@ -189,8 +189,8 @@ Error statistics are based on the infinity-norm of the relative error detailed i
 \end{table}
 
 In Table~\ref{T:error}, we see the results of this code as compared to Cantera~\cite{Cantera} on a library of partially stirred reaction conditions (PaSR) described in our previous works~\cite{CurtisGPU:2017,Niemeyer:2016aa}.
-Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{6}{9} orders of magnitude larger.
-We see here that $E_{\varepsilon}$ is over \SI{100}{\percent} for all models, indicating that this large increase in error is caused by the accumulation of floating point error from the forward and reverse ROPs, as previously discussed.
+Very close agreement is observed for the forward and reverse ROP for all models, however the net ROP error norm is \numrange{7}{9} orders of magnitude larger.
+We see here that $E_{\varepsilon}$ is very similar in magnitude to $E_R$ in all cases, indicating that this large increase in error is caused by the accumulation of floating point error from the forward and reverse ROPs, as previously discussed.
 The species rate error norm is similar in magnitude to that of the net ROP, however the temperature rate error again increases as the error in species rates is amplified by multiplication with thermodynamic properties.
 We note that the above discussion does not imply that computation of the net ROP will cause large error in chemical kinetic integration---either in this code or Cantera~\cite{Cantera}---as this loss of accuracy only occurs when the forward and reverse ROP are nearly equal, implying the reaction is in near-equilibrium.
 
