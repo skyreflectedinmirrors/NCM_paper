@@ -178,7 +178,7 @@ This estimate allows for direct comparison of the error in forward or reverse RO
 \midrule
 \multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.32e1 & 2.37e1 & 2.12e5 \\
 \multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.11e-8 & 5.90e-8 & 1.21e0 & 1.29e0 & 2.84e0 & 2.64e4 \\
-\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 2.27e0 & 1.44e2 & 3.22e03 \\
+\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 2.27e0 & 7.92e0 & 3.22e03 \\
 \multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.87e-1 & 2.26e00 & 6.10e+01 \\
 \bottomrule
 \end{tabular}
@@ -200,24 +200,24 @@ The performance studies in this work were run on four ten-core \SI{2.2}{\giga\he
 Runtimes in each case were averaged over ten runs, each using the same set of PaSR conditions utilized in validation.
 All code was compiled with \texttt{gcc 4.8.5} and ``\texttt{-O3}'' optimization, running on \texttt{v16.1.1} of the Intel OpenCL runtime supporting OpenCL \texttt{v1.2}.
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
   \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{minipage}[t]{0.48\linewidth}
     \includegraphics[width=\textwidth]{SIMD_SIMT_Order_comparison}
     \caption{Runtime in milliseconds per thermo-chemical state of shallow-SIMD and SIMT-vectorization on a single CPU core for both ``C'' (filled symbols) and ``F'' (empty symbols) data ordering.}
     \label{F:SIMDComp}
-  \end{subfigure}
+  \end{minipage}
   \hfill
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{minipage}[t]{0.48\linewidth}
     \includegraphics[width=\textwidth]{SIMD_Vecwidth_comparison}
     \caption{Speedup of a ``C''-ordered shallow-SIMD vectorization on a single CPU core when varying the supplied vector-width.}
     \label{F:Veccomp}
-  \end{subfigure} \\
-  \begin{subfigure}[t]{0.5\textwidth}
+  \end{minipage} \\
+  \begin{minipage}[t]{0.5\textwidth}
     \includegraphics[width=\textwidth]{SIMD_scaling}
     \caption{Strong parallel scaling efficiency of a ``C''-ordered shallow-SIMD vectorization using a vector-width of 16.}
     \label{F:SIMDscale}
-  \end{subfigure}
+  \end{minipage}
 \end{figure}
 
 In Fig.~\ref{F:SIMDComp}, the performance of the shallow-SIMD and SIMT vectorization are compared on a single CPU core for both ``C'' and ``F'' memory formats.
