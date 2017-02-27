@@ -165,21 +165,21 @@ To quantify this phenomena, the error in forward ROP is first defined as:
 while the error in reverse ROP, $\varepsilon^{\prime\prime}_{ij}$, can be defined analogously.
 Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest error in net ROP, i.e. $E_{R}$, an estimate of the percent error attributable to floating point error accumulation from the forward and reverse ROPs can be obtained as:
 \begin{equation}
-E_{\varepsilon} = 100\times\frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{R_{i^{*}j^{*},\text{CT}}} \si{\percent}
+E_{\varepsilon} = \frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{\num{e-10} + \num{e-6} * \left\lvert R_{i^{*}j^{*},\text{CT}} \right\rvert}
 \end{equation}
-If this estimate is near \SI{100}{\percent}, it indicates that the error in forward or reverse ROPs at this state is of a similar magnitude to the net ROP, hence the error in net ROP is expected to be large.
+This estimate allows for direct comparison of the error in forward or reverse ROPs to the net ROP, if they are of similar magnitude the error in net ROP will be large.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
 \centering
 \begin{tabular}{@{}S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] S[table-format=1.2e1] @{}}
 \toprule
-\multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$E_{\varepsilon}\si{\percent}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
+\multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$E_{\varepsilon}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
 \midrule
-\multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.08e2 & 2.37e1 & 2.12e5 \\
-\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.42e2 & 2.84e0 & 2.64e4 \\
-\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 4.12e02 & 1.44e2 & 3.22e03 \\
-\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 1.59e2 & 2.26e00 & 6.10e+01 \\
+\multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.32e1 & 2.37e1 & 2.12e5 \\
+\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.29e90 & 2.84e0 & 2.64e4 \\
+\multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 2.27e0 & 1.44e2 & 3.22e03 \\
+\multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.87e-1 & 2.26e00 & 6.10e+01 \\
 \bottomrule
 \end{tabular}
 \caption{Summary of rate of progress, species and temperature rate correctness.

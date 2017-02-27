@@ -25,7 +25,7 @@ for mech in mechs:
             precs = None
             if 'rop_net' in name:
                 #calculate the precision norms
-                precs = 100 * arrs['rop_component'] / np.abs(values)
+                precs = arrs['rop_component'] / (atol + rtol * np.abs(values))
 
             if name in err_dicts[mech_name]:
                 err_dicts[mech_name][name] = np.maximum(err_dicts[mech_name][name], errs)
