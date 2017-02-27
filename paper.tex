@@ -167,7 +167,7 @@ Finally, for the reaction $i^{*}$ and state $j^{*}$ that result in the largest e
 \begin{equation}
 E_{\varepsilon} = \frac{\max(\varepsilon^{\prime}_{i^{*}j^{*}}\text{, }\varepsilon^{\prime\prime}_{i^{*}j^{*}})}{\num{e-10} + \num{e-6} * \left\lvert R_{i^{*}j^{*},\text{CT}} \right\rvert}
 \end{equation}
-This estimate allows for direct comparison of the error in forward or reverse ROPs to the net ROP, if they are of similar magnitude the error in net ROP will be large.
+This estimate allows for direct comparison of the error in forward or reverse ROPs to the magnitude of the net ROP itself, if they are of similar magnitude the error in net ROP will be large.
 
 \begin{table}[htb]
 \sisetup{retain-zero-exponent=true}
@@ -177,7 +177,7 @@ This estimate allows for direct comparison of the error in forward or reverse RO
 \multicolumn{1}{l}{Model} & \multicolumn{1}{c}{$E_{R^{\prime}}$} & \multicolumn{1}{c}{$E_{R^{\prime\prime}}$} &\multicolumn{1}{c}{$E_{R}$} & \multicolumn{1}{c}{$E_{\varepsilon}$} & \multicolumn{1}{c}{$E_{\dot{\omega}}$} & \multicolumn{1}{c}{$E_{\frac{\partial T}{\partial t}}$} \\
 \midrule
 \multicolumn{1}{l}{\ce{H2}\slash~\ce{CO}\cite{Burke:2011fh}} & 1.20e-8 & 6.33e-8 & 1.32e1 & 1.32e1 & 2.37e1 & 2.12e5 \\
-\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.29e90 & 2.84e0 & 2.64e4 \\
+\multicolumn{1}{l}{GRI-Mech.~3.0\cite{smith_gri-mech_30}}  & 3.07e-8 & 5.90e-8 & 1.21e0 & 1.29e0 & 2.84e0 & 2.64e4 \\
 \multicolumn{1}{l}{USC-Mech II\cite{Wang:2007}}  & 1.07e-7 & 1.37e-7 & 2.39e0 & 2.27e0 & 1.44e2 & 3.22e03 \\
 \multicolumn{1}{l}{\ce{iC5H11OH}\cite{Sarathy:2013jr}} & 6.80e-8 &  1.48e-7 & 5.26e-1 & 4.87e-1 & 2.26e00 & 6.10e+01 \\
 \bottomrule
