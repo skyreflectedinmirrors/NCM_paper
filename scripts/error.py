@@ -16,7 +16,7 @@ for mech in mechs:
     for file in files:
         arrs = np.load(file)
         for name in arrs:
-            if 'value' in name or 'component' in name:
+            if 'value' in name or 'component' in name or 'store' in name:
                 continue
             errs = arrs[name]
             values = arrs[name + '_value']
@@ -25,7 +25,7 @@ for mech in mechs:
             precs = None
             if 'rop_net' in name:
                 #calculate the precision norms
-                precs = 100 * arrs['rop_component'] / arrs[name]
+                precs = 100 * arrs['rop_component'] / np.abs(values)
 
             if name in err_dicts[mech_name]:
                 err_dicts[mech_name][name] = np.maximum(err_dicts[mech_name][name], errs)
@@ -52,10 +52,11 @@ for mech in err_dicts:
         if 'wdot' in name:
             print('tdot', format(err_vals[0]))
             print('species', format(np.linalg.norm(err_vals[1:], ord=np.inf)))
-        elif 'rop_net ' in name:
+        elif 'rop_net' in name:
             #find prevision range
             maxv = np.linalg.norm(err_vals, ord=np.inf)
             maxind = np.where(err_dicts[mech][name] == maxv)[0][0]
             print(name, format(maxv))
-        elif 'prec' not in name:
+            print('rop_component', format(err_dicts[mech]['rop_component'][maxind]))
+        elif 'component' not in name:
             print(name, format(np.linalg.norm(err_vals, ord=np.inf)))
